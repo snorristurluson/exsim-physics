@@ -47,6 +47,10 @@ add_subdirectory(${CMAKE_BINARY_DIR}/rapidjson-src
         ${CMAKE_BINARY_DIR}/rapidjson-build
         EXCLUDE_FROM_ALL)
 
+INCLUDE_DIRECTORIES(
+        ${CMAKE_BINARY_DIR}/rapidjson-src/include
+)
+
 add_executable(solarsystem_test
         src/Solarsystem_test.cpp
 )
