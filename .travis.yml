@@ -1,1 +1,10 @@
 language: cpp
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - solarsystem_test
+  - ship_test
+  - commandparser_test
