@@ -19,7 +19,7 @@ Solarsystem::Solarsystem() {
             m_collisionConfiguration
     );
 
-    m_dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    m_dynamicsWorld->setGravity(btVector3(0, 0, 0));
 }
 
 Solarsystem::~Solarsystem() {

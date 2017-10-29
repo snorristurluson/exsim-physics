@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
+
+ADD_DEFINITIONS(
+        -std=c++11
+)
+
+find_package(RAPIDJson)
+
 INCLUDE_DIRECTORIES(
         /usr/local/Cellar/bullet/2.87/include/bullet/
 )
@@ -10,7 +17,7 @@ LINK_LIBRARIES(
 ADD_EXECUTABLE(exsim-physics
         src/main.cpp
         src/Solarsystem.cpp
-        src/Ship.cpp src/Ship.h)
+        src/Ship.cpp src/Ship.h src/Commands.h src/CommandHandler.cpp src/CommandHandler.h src/CommandParser.cpp src/CommandParser.h)
 
 
 IF (INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
@@ -63,3 +70,9 @@ add_executable(ship_test
         src/Ship.cpp
     )
 target_link_libraries(ship_test gtest_main)
+
+add_executable(commandparser_test
+        src/CommandParser_test.cpp
+        src/CommandParser.cpp
+        src/CommandParser_test.cpp)
+target_link_libraries(commandparser_test gtest_main)

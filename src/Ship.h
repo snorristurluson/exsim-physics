@@ -9,9 +9,7 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <LinearMath/btDefaultMotionState.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
-
-typedef int64_t esTypeId;
-typedef int64_t esUserId;
+#include "Types.h"
 
 class Ship
 {

@@ -9,7 +9,8 @@
 #include "btBulletDynamicsCommon.h"
 #include "Ship.h"
 
-class Solarsystem {
+class Solarsystem
+{
 public:
     Solarsystem();
     ~Solarsystem();
