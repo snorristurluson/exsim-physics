@@ -6,6 +6,7 @@
 #define PROJECT_SOLARSYSTEM_H
 
 #include <vector>
+#include <string>
 #include "btBulletDynamicsCommon.h"
 #include "Ship.h"
 
@@ -19,9 +20,10 @@ public:
     void addCollisionShape(btCollisionShape* shape);
     void addRigidBody(btRigidBody* body);
     void stepSimulation(btScalar timeStep);
-    std::vector<btVector3> getPositions();
+    std::string getStateAsJson();
 
 protected:
+    std::vector<Ship*> m_ships;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     btCollisionDispatcher* m_dispatcher;
     btBroadphaseInterface* m_overlappingPairCache;

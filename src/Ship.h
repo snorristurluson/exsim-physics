@@ -22,7 +22,14 @@ public:
 
     btCollisionShape* getCollisionShape();
     btRigidBody* getBody();
+
+    esUserId getOwner();
+    esTypeId getType();
+    btVector3 getPosition();
+
 protected:
+    esUserId m_owner;
+    esTypeId m_type;
     btTransform m_transform;
     btScalar m_mass;
     btCollisionShape* m_collisionShape;

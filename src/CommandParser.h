@@ -20,7 +20,7 @@ protected:
 
     void parseStepSimulation(Command *command, rapidjson::Document &d);
 
-    void parseGetPositions(Command *command, rapidjson::Document &d);
+    void parseGetState(Command *command, rapidjson::Document &d);
 };
 
 

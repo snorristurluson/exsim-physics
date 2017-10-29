@@ -32,9 +32,9 @@ Command *CommandParser::parse(const std::string &input)
     {
         parseStepSimulation(result, d );
     }
-    else if(command == "getpositions")
+    else if(command == "getstate")
     {
-        parseGetPositions(result, d);
+        parseGetState(result, d);
     }
     else
     {
@@ -99,8 +99,8 @@ void CommandParser::parseStepSimulation(Command *command, rapidjson::Document &d
     command->params = params;
 }
 
-void CommandParser::parseGetPositions(Command *command, rapidjson::Document &d)
+void CommandParser::parseGetState(Command *command, rapidjson::Document &d)
 {
-    command->command = cmdGetPositions;
+    command->command = cmdGetState;
 }
 

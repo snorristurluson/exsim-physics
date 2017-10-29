@@ -3,8 +3,13 @@
 //
 
 #include <vector>
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include "btBulletDynamicsCommon.h"
 #include "Solarsystem.h"
+
+using namespace rapidjson;
 
 Solarsystem::Solarsystem() {
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -62,32 +67,47 @@ void Solarsystem::stepSimulation(btScalar timeStep) {
     m_dynamicsWorld->stepSimulation(timeStep);
 }
 
-std::vector<btVector3> Solarsystem::getPositions() {
-    std::vector<btVector3> result;
-    result.reserve(m_dynamicsWorld->getNumCollisionObjects());
-
-    for (int j = m_dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
-    {
-        btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[j];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        btTransform trans;
-        if (body && body->getMotionState())
-        {
-            body->getMotionState()->getWorldTransform(trans);
-        }
-        else
-        {
-            trans = obj->getWorldTransform();
-        }
-        result.push_back(trans.getOrigin());
-    }
-
-    return result;
-}
-
 void Solarsystem::addShip(Ship *ship)
 {
     ship->prepare();
     addCollisionShape(ship->getCollisionShape());
     addRigidBody(ship->getBody());
+    m_ships.push_back(ship);
+}
+
+std::string Solarsystem::getStateAsJson()
+{
+    Document d;
+
+    Value ships;
+    ships.SetArray();
+    for(auto ship: m_ships)
+    {
+        Value shipData;
+        shipData.SetObject();
+        Value owner(ship->getOwner());
+        Value type(ship->getType());
+        shipData.AddMember("owner", owner, d.GetAllocator());
+        shipData.AddMember("type", type, d.GetAllocator());
+
+        Value positionData;
+        positionData.SetObject();
+
+        auto position = ship->getPosition();
+        positionData.AddMember("x", Value(position.x()), d.GetAllocator());
+        positionData.AddMember("y", Value(position.y()), d.GetAllocator());
+        positionData.AddMember("z", Value(position.z()), d.GetAllocator());
+
+        shipData.AddMember("position", positionData, d.GetAllocator());
+
+        ships.PushBack(shipData, d.GetAllocator());
+    }
+    d.SetObject();
+    d.AddMember("ships", ships, d.GetAllocator());
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+
+    return buffer.GetString();
 }

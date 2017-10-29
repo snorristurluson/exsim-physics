@@ -88,10 +88,10 @@ TEST(CommandParser, InvalidStepSimulationCommand)
     EXPECT_EQ(nullptr, cmd->params);
 }
 
-TEST(CommandParser, GetPositionsCommand)
+TEST(CommandParser, GetStateCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"getpositions\"}");
+    auto cmd = parser.parse("{\"command\": \"getstate\"}");
 
-    EXPECT_EQ(cmdGetPositions, cmd->command);
+    EXPECT_EQ(cmdGetState, cmd->command);
 }
