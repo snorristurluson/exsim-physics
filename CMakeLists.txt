@@ -4,8 +4,6 @@ ADD_DEFINITIONS(
         -std=c++11
 )
 
-find_package(RAPIDJson)
-
 INCLUDE_DIRECTORIES(
         /usr/local/Cellar/bullet/2.87/include/bullet/
 )
@@ -27,7 +25,7 @@ IF (INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
 ENDIF(INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
 
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+configure_file(CMakeLists-googletest.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
@@ -58,7 +56,21 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-# Now simply link against gtest or gtest_main as needed. Eg
+
+configure_file(CMakeLists-rapidjson.txt.in rapidjson-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/rapidjson-download )
+if(result)
+    message(FATAL_ERROR "CMake step for rapidjson failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/rapidjson-download )
+if(result)
+    message(FATAL_ERROR "Build step for rapidjson failed: ${result}")
+endif()
+
 add_executable(solarsystem_test
         src/Solarsystem_test.cpp
 )
