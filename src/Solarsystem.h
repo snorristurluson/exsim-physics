@@ -7,12 +7,14 @@
 
 #include <vector>
 #include "btBulletDynamicsCommon.h"
+#include "Ship.h"
 
 class Solarsystem {
 public:
     Solarsystem();
     ~Solarsystem();
 
+    void addShip(Ship* ship);
     void addCollisionShape(btCollisionShape* shape);
     void addRigidBody(btRigidBody* body);
     void stepSimulation(btScalar timeStep);

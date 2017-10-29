@@ -84,3 +84,10 @@ std::vector<btVector3> Solarsystem::getPositions() {
 
     return result;
 }
+
+void Solarsystem::addShip(Ship *ship)
+{
+    ship->prepare();
+    addCollisionShape(ship->getCollisionShape());
+    addRigidBody(ship->getBody());
+}

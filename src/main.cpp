@@ -1,5 +1,6 @@
 #include "btBulletDynamicsCommon.h"
 #include "Solarsystem.h"
+#include "Ship.h"
 
 int main(int argc, char** argv)
 {
@@ -39,31 +40,19 @@ int main(int argc, char** argv)
 		solarsystem.addRigidBody(body);
 	}
 
-	{
-		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-		solarsystem.addCollisionShape(colShape);
+    btTransform startTransform;
+    startTransform.setIdentity();
+    startTransform.setOrigin(btVector3(2, 10, 0));
 
-		btTransform startTransform;
-		startTransform.setIdentity();
+    Ship* ship1 = new Ship(1, 1);
+	startTransform.setOrigin(btVector3(2, 10, 0));
+    ship1->setTransform(startTransform);
+    solarsystem.addShip(ship1);
 
-		btScalar mass(1.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(btVector3(2, 10, 0));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		solarsystem.addRigidBody(body);
-	}
+	Ship* ship2 = new Ship(2, 1);
+	startTransform.setOrigin(btVector3(-2, 10, 0));
+	ship1->setTransform(startTransform);
+	solarsystem.addShip(ship1);
 
 	for (i = 0; i < 150; i++)
 	{

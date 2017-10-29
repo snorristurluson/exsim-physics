@@ -10,7 +10,7 @@ LINK_LIBRARIES(
 ADD_EXECUTABLE(exsim-physics
         src/main.cpp
         src/Solarsystem.cpp
-)
+        src/Ship.cpp src/Ship.h)
 
 
 IF (INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
@@ -56,4 +56,10 @@ add_executable(solarsystem_test
         src/Solarsystem_test.cpp
 )
 target_link_libraries(solarsystem_test gtest_main)
-add_test(NAME example_test COMMAND example)
+# add_test(NAME example_test COMMAND example)
+
+add_executable(ship_test
+        src/Ship_test.cpp
+        src/Ship.cpp
+    )
+target_link_libraries(ship_test gtest_main)
