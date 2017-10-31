@@ -6,6 +6,7 @@
 #define PROJECT_COMMANDHANDLER_H
 
 
+#include <netinet/in.h>
 #include "Solarsystem.h"
 #include "Commands.h"
 
@@ -24,6 +25,8 @@ protected:
     std::string handleGetState();
 
     void handleInput(const std::string &commandString);
+
+    int setupFdSet(int listen_fd, fd_set &readfds) const;
 };
 
 

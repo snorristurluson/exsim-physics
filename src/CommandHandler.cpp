@@ -3,7 +3,6 @@
 //
 
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <unistd.h>
 #include <string>
 #include <iostream>
@@ -42,31 +41,10 @@ void CommandHandler::start(Solarsystem *solarsystem, int port)
     ssize_t bytesRead;
     do
     {
-        //clear the socket set
-        FD_ZERO(&readfds);
-
-        //add master socket to set
-        FD_SET(listen_fd, &readfds);
-        auto max_sd = listen_fd;
-
-        //add child sockets to set
-        for(int fd: m_connections)
-        {
-            //if valid socket descriptor then add to read list
-            if(fd > 0)
-            {
-                FD_SET( fd , &readfds);
-            }
-
-            //highest file descriptor number, need it for the select function
-            if(fd > max_sd)
-            {
-                max_sd = fd;
-            }
-        }
+        auto max_sd = setupFdSet(listen_fd, readfds);
 
         std::cout << "Calling select with " << m_connections.size() << " connections" << std::endl;
-        int activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+        auto activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
         if(activity < 0)
         {
             std::cout << "select error" << std::endl;
@@ -113,6 +91,26 @@ void CommandHandler::start(Solarsystem *solarsystem, int port)
         }
 
     } while(true);
+}
+
+int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
+{
+    auto max_sd = listen_fd;
+    FD_ZERO(&readfds);
+    FD_SET(listen_fd, &readfds);
+    for(int fd: m_connections)
+    {
+        if(fd > 0)
+        {
+            FD_SET( fd , &readfds);
+        }
+
+        if(fd > max_sd)
+        {
+            max_sd = fd;
+        }
+    }
+    return max_sd;
 }
 
 void CommandHandler::handleInput(const std::string &commandString)
