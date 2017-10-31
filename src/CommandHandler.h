@@ -16,14 +16,14 @@ public:
 
 protected:
     Solarsystem* m_solarsystem;
+    std::vector<int> m_connections;
 
     std::string handleCommand(Command *cmd);
-
     std::string handleAddShip(ParamsAddShip *params);
-
     std::string handleStepSimulation(ParamsStepSimulation *params);
-
     std::string handleGetState();
+
+    void handleInput(const std::string &commandString);
 };
 
 
