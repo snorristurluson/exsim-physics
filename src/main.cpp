@@ -5,8 +5,8 @@
 
 int main(int argc, char** argv)
 {
-    Solarsystem solarsystem;
+    int port = atoi(argv[1]);
 
     CommandHandler handler;
-    handler.start(&solarsystem, 4041);
+    handler.start(port);
 }

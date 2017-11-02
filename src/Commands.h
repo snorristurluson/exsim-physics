@@ -14,7 +14,9 @@ typedef enum
     cmdError = -1,
     cmdAddShip,
     cmdStepSimulation,
-    cmdGetState
+    cmdGetState,
+    cmdSetMain,
+    cmdSetViewer
 } CommandType;
 
 struct Params

@@ -95,3 +95,20 @@ TEST(CommandParser, GetStateCommand)
 
     EXPECT_EQ(cmdGetState, cmd->command);
 }
+
+TEST(CommandParser, SetAsMainCommand)
+{
+    CommandParser parser;
+    auto cmd = parser.parse("{\"command\": \"setmain\"}");
+
+    EXPECT_EQ(cmdSetMain, cmd->command);
+}
+
+TEST(CommandParser, SetAsViewerCommand)
+{
+    CommandParser parser;
+    auto cmd = parser.parse("{\"command\": \"setviewer\"}");
+
+    EXPECT_EQ(cmdSetViewer, cmd->command);
+}
+

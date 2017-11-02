@@ -36,6 +36,14 @@ Command *CommandParser::parse(const std::string &input)
     {
         parseGetState(result, d);
     }
+    else if(command == "setmain")
+    {
+        result->command = cmdSetMain;
+    }
+    else if(command == "setviewer")
+    {
+        result->command = cmdSetViewer;
+    }
     else
     {
         result->command = cmdError;

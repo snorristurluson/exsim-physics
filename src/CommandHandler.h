@@ -13,10 +13,11 @@
 class CommandHandler
 {
 public:
-    void start(Solarsystem* solarsystem, int port);
+    void start(int port);
 
 protected:
     Solarsystem* m_solarsystem;
+    int m_mainConnection;
     std::vector<int> m_connections;
 
     std::string handleCommand(Command *cmd);
@@ -24,7 +25,7 @@ protected:
     std::string handleStepSimulation(ParamsStepSimulation *params);
     std::string handleGetState();
 
-    void handleInput(const std::string &commandString);
+    CommandType handleInput(const std::string &commandString);
 
     int setupFdSet(int listen_fd, fd_set &readfds) const;
 };

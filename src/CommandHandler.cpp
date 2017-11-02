@@ -9,11 +9,12 @@
 #include "CommandHandler.h"
 #include "CommandParser.h"
 
-void CommandHandler::start(Solarsystem *solarsystem, int port)
+void CommandHandler::start(int port)
 {
-    std::cout << "Starting solarsystem" << std::endl;
+    std::cout << "Starting solarsystem on port " << port << std::endl;
 
-    m_solarsystem = solarsystem;
+    m_solarsystem = new Solarsystem;
+    m_mainConnection = -1;
 
     fd_set readfds;
 
@@ -70,18 +71,28 @@ void CommandHandler::start(Solarsystem *solarsystem, int port)
         {
             if(FD_ISSET(*it, &readfds))
             {
-                std::cout << "Got data" << std::endl;
                 bzero(buffer, sizeof(buffer));
                 bytesRead = read(*it, buffer, sizeof(buffer));
                 if(bytesRead)
                 {
                     std::string commandString(buffer);
-                    handleInput(commandString);
+                    std::cout << commandString << std::endl;
+                    auto cmd = handleInput(commandString);
+                    if(cmd == cmdSetMain)
+                    {
+                        m_mainConnection = *it;
+                    }
                 }
                 else
                 {
                     dropped_connections.push_back(it);
                     std::cout << "Connection closed" << std::endl;
+                    if(*it == m_mainConnection)
+                    {
+                        delete m_solarsystem;
+                        m_solarsystem = new Solarsystem;
+                        m_mainConnection = -1;
+                    }
                 }
             }
         }
@@ -113,7 +124,7 @@ int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
     return max_sd;
 }
 
-void CommandHandler::handleInput(const std::string &commandString)
+CommandType CommandHandler::handleInput(const std::string &commandString)
 {
     CommandParser parser;
     auto command = parser.parse(commandString);
@@ -132,6 +143,8 @@ void CommandHandler::handleInput(const std::string &commandString)
             write(connection, "\n", 1);
         }
     }
+
+    return command->command;
 }
 
 std::string CommandHandler::handleCommand(Command *cmd)
@@ -151,6 +164,10 @@ std::string CommandHandler::handleCommand(Command *cmd)
 
         case cmdGetState:
             return handleGetState();
+
+        case cmdSetMain:
+            return "\"ok\"";
+
     }
     return "error";
 }

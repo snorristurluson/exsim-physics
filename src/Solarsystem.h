@@ -17,10 +17,12 @@ public:
     ~Solarsystem();
 
     void addShip(Ship* ship);
-    void addCollisionShape(btCollisionShape* shape);
-    void addRigidBody(btRigidBody* body);
     void stepSimulation(btScalar timeStep);
     std::string getStateAsJson();
+
+protected:
+    void addCollisionShape(btCollisionShape* shape);
+    void addRigidBody(btRigidBody* body);
 
 protected:
     std::vector<Ship*> m_ships;
