@@ -79,6 +79,9 @@ std::string Solarsystem::getStateAsJson()
 {
     Document d;
 
+    Value state;
+    state.SetObject();
+
     Value ships;
     ships.SetArray();
     for(auto ship: m_ships)
@@ -102,8 +105,10 @@ std::string Solarsystem::getStateAsJson()
 
         ships.PushBack(shipData, d.GetAllocator());
     }
+    state.AddMember("ships", ships, d.GetAllocator());
+
     d.SetObject();
-    d.AddMember("ships", ships, d.GetAllocator());
+    d.AddMember("state", state, d.GetAllocator());
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);

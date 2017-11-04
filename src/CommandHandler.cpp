@@ -136,17 +136,15 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
 
         auto response = handleCommand(command);
 
-        if(response == "error")
+        if(response.size())
         {
-            response += ": " + commandString;
-        }
-
-        for(auto connection: m_connections)
-        {
-            write(connection, response.c_str(), response.size());
-            if(response.back() != '\n')
+            for(auto connection: m_connections)
             {
-                write(connection, "\n", 1);
+                write(connection, response.c_str(), response.size());
+                if(response.back() != '\n')
+                {
+                    write(connection, "\n", 1);
+                }
             }
         }
     }
@@ -157,7 +155,7 @@ std::string CommandHandler::handleCommand(Command *cmd)
     switch(cmd->command)
     {
         case cmdError:
-            return "error";
+            return "{\"result\": \"error\"}";
 
         case cmdAddShip:
             return handleAddShip(
@@ -171,10 +169,10 @@ std::string CommandHandler::handleCommand(Command *cmd)
             return handleGetState();
 
         case cmdSetMain:
-            return "\"ok\"";
+            return "{\"result\": \"ok\"}";
 
     }
-    return "error";
+    return "{\"result\": \"error\"}";
 }
 
 std::string CommandHandler::handleAddShip(ParamsAddShip *params)
@@ -187,13 +185,13 @@ std::string CommandHandler::handleAddShip(ParamsAddShip *params)
     ship->setTransform(t);
     m_solarsystem->addShip(ship);
 
-    return "ok";
+    return "{\"result\": \"ok\"}";
 }
 
 std::string CommandHandler::handleStepSimulation(ParamsStepSimulation *params)
 {
     m_solarsystem->stepSimulation(params->timestep);
-    return "ok";
+    return "{\"result\": \"ok\"}";
 }
 
 std::string CommandHandler::handleGetState()
