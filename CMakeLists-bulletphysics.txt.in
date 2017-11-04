@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(bulletphysics-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(bulletphysics
+        GIT_REPOSITORY    https://github.com/bulletphysics/bullet3
+        GIT_TAG           2.87
+        SOURCE_DIR        "${CMAKE_BINARY_DIR}/bulletphysics-src"
+        BINARY_DIR        "${CMAKE_BINARY_DIR}/bulletphysics-build"
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND     cmake -DBUILD_PYBULLET=OFF -DBUILD_PYBULLET_NUMPY=OFF -DUSE_DOUBLE_PRECISION=ON -DBUILD_OPENGL3_DEMOS=OFF -DBUILD_BULLET2_DEMOS=OFF -DBUILD_UNIT_TESTS=OFF ${CMAKE_BINARY_DIR}/bulletphysics-src && make
+        INSTALL_COMMAND   ""
+        TEST_COMMAND      ""
+        )
+

@@ -13,7 +13,7 @@ TEST(CommandParser, CanCreate)
 TEST(CommandParser, EmptyInputReturnsError)
 {
     CommandParser parser;
-    auto cmd = parser.parse("");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
 }
@@ -21,7 +21,8 @@ TEST(CommandParser, EmptyInputReturnsError)
 TEST(CommandParser, UnknownCommandReturnsRerror)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"bingo\"}");
+    parser.feed("{\"command\": \"bingo\"}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
 }
@@ -29,7 +30,8 @@ TEST(CommandParser, UnknownCommandReturnsRerror)
 TEST(CommandParser, SimpleAddShipCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"addship\", \"owner\": 1, \"type\": 2, \"position\": {\"x\": -10.0, \"y\": 10.0, \"z\": 0.0}}");
+    parser.feed("{\"command\": \"addship\", \"owner\": 1, \"type\": 2, \"position\": {\"x\": -10.0, \"y\": 10.0, \"z\": 0.0}}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdAddShip, cmd->command);
     auto paramsAddShip = dynamic_cast<ParamsAddShip*>(cmd->params);
@@ -44,7 +46,8 @@ TEST(CommandParser, SimpleAddShipCommand)
 TEST(CommandParser, InvalidAddShipCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"addship\", \"bingo\": 1, \"type\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}");
+    parser.feed("{\"command\": \"addship\", \"bingo\": 1, \"type\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
     EXPECT_EQ(nullptr, cmd->params);
@@ -53,7 +56,8 @@ TEST(CommandParser, InvalidAddShipCommand)
 TEST(CommandParser, AddShipCommandWithWrongTypeForOwner)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"addship\", \"owner\": \"1\", \"type\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}");
+    parser.feed("{\"command\": \"addship\", \"owner\": \"1\", \"type\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
     EXPECT_EQ(nullptr, cmd->params);
@@ -62,7 +66,8 @@ TEST(CommandParser, AddShipCommandWithWrongTypeForOwner)
 TEST(CommandParser, AddShipCommandWithInvalidPositionOwner)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"addship\", \"owner\": 1, \"type\": 2, \"position\": {\"bingo\": -10, \"y\": 10, \"z\": 0}}");
+    parser.feed("{\"command\": \"addship\", \"owner\": 1, \"type\": 2, \"position\": {\"bingo\": -10, \"y\": 10, \"z\": 0}}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
     EXPECT_EQ(nullptr, cmd->params);
@@ -71,7 +76,8 @@ TEST(CommandParser, AddShipCommandWithInvalidPositionOwner)
 TEST(CommandParser, StepSimulationCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"stepsimulation\", \"timestep\": 0.1}");
+    parser.feed("{\"command\": \"stepsimulation\", \"timestep\": 0.1}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdStepSimulation, cmd->command);
     auto params = dynamic_cast<ParamsStepSimulation*>(cmd->params);
@@ -82,7 +88,8 @@ TEST(CommandParser, StepSimulationCommand)
 TEST(CommandParser, InvalidStepSimulationCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"stepsimulation\", \"bingo\": 0.1}");
+    parser.feed("{\"command\": \"stepsimulation\", \"bingo\": 0.1}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
     EXPECT_EQ(nullptr, cmd->params);
@@ -91,7 +98,8 @@ TEST(CommandParser, InvalidStepSimulationCommand)
 TEST(CommandParser, GetStateCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"getstate\"}");
+    parser.feed("{\"command\": \"getstate\"}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdGetState, cmd->command);
 }
@@ -99,7 +107,8 @@ TEST(CommandParser, GetStateCommand)
 TEST(CommandParser, SetAsMainCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"setmain\"}");
+    parser.feed("{\"command\": \"setmain\"}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdSetMain, cmd->command);
 }
@@ -107,8 +116,19 @@ TEST(CommandParser, SetAsMainCommand)
 TEST(CommandParser, SetAsViewerCommand)
 {
     CommandParser parser;
-    auto cmd = parser.parse("{\"command\": \"setviewer\"}");
+    parser.feed("{\"command\": \"setviewer\"}");
+    auto cmd = parser.parse();
 
     EXPECT_EQ(cmdSetViewer, cmd->command);
 }
 
+TEST(CommandParser, TwoCommandsInOne)
+{
+    CommandParser parser;
+    parser.feed("{\"command\": \"setmain\"}{\"command\": \"setviewer\"}");
+    auto cmd = parser.parse();
+    EXPECT_EQ(cmdSetMain, cmd->command);
+    cmd = parser.parse();
+    EXPECT_EQ(cmdSetViewer, cmd->command);
+    EXPECT_TRUE(parser.isDone());
+}

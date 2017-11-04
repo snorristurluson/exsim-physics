@@ -2,16 +2,29 @@
 // Created by Snorri Sturluson on 29/10/2017.
 //
 
+#include <rapidjson/istreamwrapper.h>
 #include "CommandParser.h"
 
 using namespace rapidjson;
 
-Command *CommandParser::parse(const std::string &input)
+void CommandParser::feed(const std::string &input)
+{
+    m_input << input;
+}
+
+Command *CommandParser::parse()
 {
     auto result = new Command;
 
-    Document d;
-    if(d.Parse(input.c_str()).HasParseError())
+    IStreamWrapper s(m_input);
+
+    GenericDocument<UTF8<> > d;
+    d.ParseStream<kParseStopWhenDoneFlag, UTF8<>, IStreamWrapper>(s);
+
+    // Peek into the stream to trigger eof so that isDone works properly
+    m_input.peek();
+
+    if(d.HasParseError())
     {
         result->command = cmdError;
         return result;
@@ -110,5 +123,10 @@ void CommandParser::parseStepSimulation(Command *command, rapidjson::Document &d
 void CommandParser::parseGetState(Command *command, rapidjson::Document &d)
 {
     command->command = cmdGetState;
+}
+
+bool CommandParser::isDone()
+{
+    return m_input.eof();
 }
 

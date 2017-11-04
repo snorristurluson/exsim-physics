@@ -77,11 +77,7 @@ void CommandHandler::start(int port)
                 {
                     std::string commandString(buffer);
                     std::cout << commandString << std::endl;
-                    auto cmd = handleInput(commandString);
-                    if(cmd == cmdSetMain)
-                    {
-                        m_mainConnection = *it;
-                    }
+                    handleInput(commandString, *it);
                 }
                 else
                 {
@@ -124,27 +120,36 @@ int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
     return max_sd;
 }
 
-CommandType CommandHandler::handleInput(const std::string &commandString)
+void CommandHandler::handleInput(const std::string &commandString, int connection)
 {
     CommandParser parser;
-    auto command = parser.parse(commandString);
-    auto response = handleCommand(command);
+    parser.feed(commandString);
 
-    if(response == "error")
+    while(!parser.isDone())
     {
-        response += ": " + commandString;
-    }
-
-    for(auto connection: m_connections)
-    {
-        write(connection, response.c_str(), response.size());
-        if(response.back() != '\n')
+        auto command = parser.parse();
+        std::cout << command->command << std::endl;
+        if(command->command == cmdSetMain)
         {
-            write(connection, "\n", 1);
+            m_mainConnection = connection;
+        }
+
+        auto response = handleCommand(command);
+
+        if(response == "error")
+        {
+            response += ": " + commandString;
+        }
+
+        for(auto connection: m_connections)
+        {
+            write(connection, response.c_str(), response.size());
+            if(response.back() != '\n')
+            {
+                write(connection, "\n", 1);
+            }
         }
     }
-
-    return command->command;
 }
 
 std::string CommandHandler::handleCommand(Command *cmd)

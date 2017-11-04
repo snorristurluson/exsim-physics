@@ -7,15 +7,20 @@
 
 
 #include <string>
+#include <sstream>
 #include "rapidjson/document.h"
 #include "Commands.h"
 
 class CommandParser
 {
 public:
-    Command* parse(const std::string& input);
+    void feed(const std::string& input);
+    Command* parse();
+    bool isDone();
 
 protected:
+    std::stringstream m_input;
+
     void parseAddShip(Command *command, rapidjson::Document &d);
     void parseStepSimulation(Command *command, rapidjson::Document &d);
     void parseGetState(Command *command, rapidjson::Document &d);

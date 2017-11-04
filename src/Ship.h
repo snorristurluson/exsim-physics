@@ -30,7 +30,7 @@ public:
 protected:
     esUserId m_owner;
     esTypeId m_type;
-    btTransform m_transform;
+    btTransform* m_transform;
     btScalar m_mass;
     btCollisionShape* m_collisionShape;
     btDefaultMotionState* m_motionState;

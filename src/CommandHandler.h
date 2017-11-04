@@ -25,7 +25,7 @@ protected:
     std::string handleStepSimulation(ParamsStepSimulation *params);
     std::string handleGetState();
 
-    CommandType handleInput(const std::string &commandString);
+    void handleInput(const std::string &commandString, int connection);
 
     int setupFdSet(int listen_fd, fd_set &readfds) const;
 };

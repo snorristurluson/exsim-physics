@@ -3,26 +3,30 @@
 
 TEST(Ship, CanCreate)
 {
-    auto* ship = new Ship(1, 1);
+    auto ship = new Ship(1, 1);
+    delete ship;
 }
 
 TEST(Ship, NewlyCreatedShipHasNullBody)
 {
-    auto* ship = new Ship(1, 1);
+    auto ship = new Ship(1, 1);
     ASSERT_EQ(nullptr, ship->getBody());
+    delete ship;
 }
 
-TEST(Ship, NewlyCreatedShipHasCollisionShape)
+TEST(Ship, NewlyCreatedShipHasNullCollisionShape)
 {
-    auto* ship = new Ship(1, 1);
-    ASSERT_NE(nullptr, ship->getCollisionShape());
+    auto ship = new Ship(1, 1);
+    ASSERT_EQ(nullptr, ship->getCollisionShape());
+    delete ship;
 }
 
 TEST(Ship, PreparedShipHasBody)
 {
-    auto* ship = new Ship(1, 1);
+    auto ship = new Ship(1, 1);
     ship->prepare();
     ASSERT_NE(nullptr, ship->getBody());
+    delete ship;
 }
 
 
