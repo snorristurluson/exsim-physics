@@ -5,6 +5,7 @@ script:
   - cd build
   - cmake ..
   - make
+  - ls -al
   - solarsystem_test
   - ship_test
   - commandparser_test

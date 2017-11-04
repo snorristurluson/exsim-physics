@@ -66,8 +66,8 @@ void CommandHandler::start(int port)
             m_connections.push_back(connection_fd);
         }
 
-        std::vector<std::vector<int>::const_iterator> dropped_connections;
-        for(auto it = m_connections.cbegin(); it != m_connections.cend(); ++it)
+        std::vector<std::vector<int>::iterator> dropped_connections;
+        for(auto it = m_connections.begin(); it != m_connections.end(); ++it)
         {
             if(FD_ISSET(*it, &readfds))
             {
