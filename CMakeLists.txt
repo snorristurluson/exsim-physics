@@ -73,10 +73,19 @@ LINK_LIBRARIES(
         BulletDynamics BulletCollision LinearMath
 )
 
+ADD_DEFINITIONS(-DBT_USE_DOUBLE_PRECISION)
+
 ADD_EXECUTABLE(exsim-physics
         src/main.cpp
         src/Solarsystem.cpp
-        src/Ship.cpp src/Ship.h src/Commands.h src/CommandHandler.cpp src/CommandHandler.h src/CommandParser.cpp src/CommandParser.h)
+        src/Ship.cpp
+        src/Ship.h
+        src/Commands.h
+        src/CommandHandler.cpp
+        src/CommandHandler.h
+        src/CommandParser.cpp
+        src/CommandParser.h
+        )
 
 
 add_executable(solarsystem_test
@@ -87,6 +96,7 @@ target_link_libraries(solarsystem_test gtest_main)
 add_executable(ship_test
         src/Ship_test.cpp
         src/Ship.cpp
+        src/Types.h
     )
 target_link_libraries(ship_test gtest_main)
 

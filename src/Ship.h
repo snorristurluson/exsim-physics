@@ -28,9 +28,9 @@ public:
     btVector3 getPosition();
 
 protected:
+    ATTRIBUTE_ALIGNED16(btTransform m_transform);
     esUserId m_owner;
     esTypeId m_type;
-    btTransform* m_transform;
     btScalar m_mass;
     btCollisionShape* m_collisionShape;
     btDefaultMotionState* m_motionState;

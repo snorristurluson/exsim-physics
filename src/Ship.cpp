@@ -14,13 +14,12 @@ Ship::Ship(esUserId owner, esTypeId shipType) :
     // Todo: Details should come from shipType
     m_collisionShape = new btSphereShape(1.0);
     m_mass = btScalar(1.f);
-    m_transform = static_cast<btTransform*>(btAlignedAlloc(sizeof(m_transform), 16));
-    m_transform->setIdentity();
+    m_transform.setIdentity();
 }
 
 void Ship::setTransform(const btTransform &t)
 {
-    *m_transform = t;
+    m_transform = t;
 
     // Todo: should this work after entering a solar system?
 }
@@ -30,7 +29,7 @@ void Ship::prepare()
     btVector3 localInertia(0, 0, 0);
     m_collisionShape->calculateLocalInertia(m_mass, localInertia);
 
-    m_motionState = nullptr; //new btDefaultMotionState(*m_transform);
+    m_motionState = new btDefaultMotionState(m_transform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(
             m_mass, m_motionState, m_collisionShape, localInertia
     );
