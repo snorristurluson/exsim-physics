@@ -14,10 +14,10 @@ TEST(Ship, NewlyCreatedShipHasNullBody)
     delete ship;
 }
 
-TEST(Ship, NewlyCreatedShipHasNullCollisionShape)
+TEST(Ship, NewlyCreatedShipHasCollisionShape)
 {
     auto ship = new Ship(1, 1);
-    ASSERT_EQ(nullptr, ship->getCollisionShape());
+    ASSERT_NE(nullptr, ship->getCollisionShape());
     delete ship;
 }
 

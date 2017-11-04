@@ -14,8 +14,8 @@ Ship::Ship(esUserId owner, esTypeId shipType) :
     // Todo: Details should come from shipType
     m_collisionShape = new btSphereShape(1.0);
     m_mass = btScalar(1.f);
-    //m_transform = static_cast<btTransform*>(btAlignedAlloc(sizeof(m_transform), 16));
-    //m_transform->setIdentity();
+    m_transform = static_cast<btTransform*>(btAlignedAlloc(sizeof(m_transform), 16));
+    m_transform->setIdentity();
 }
 
 void Ship::setTransform(const btTransform &t)
@@ -27,7 +27,6 @@ void Ship::setTransform(const btTransform &t)
 
 void Ship::prepare()
 {
-    return;
     btVector3 localInertia(0, 0, 0);
     m_collisionShape->calculateLocalInertia(m_mass, localInertia);
 
