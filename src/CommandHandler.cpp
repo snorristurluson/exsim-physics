@@ -137,8 +137,6 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
 
     for(auto line: lines)
     {
-        std::cout << line << std::endl;
-
         CommandParser parser;
         parser.feed(line);
 

@@ -3,6 +3,7 @@
 //
 
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <iostream>
 #include "Ship.h"
 
 Ship::Ship(esUserId owner, esTypeId shipType) :
@@ -83,7 +84,11 @@ void Ship::update(btScalar dt)
     if(distance > 1.0)
     {
         // Speed should come from the ship type and modifiers
-        velocity = v.normalized() * 20.0;
+        velocity = v.normalized() * 50.0;
+    }
+    else
+    {
+        std::cout << "Ship " << m_owner << "close to target" << std::endl;
     }
 
     m_body->setLinearVelocity(velocity);
