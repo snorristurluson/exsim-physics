@@ -24,6 +24,7 @@ protected:
     void parseAddShip(Command *command, rapidjson::Document &d);
     void parseStepSimulation(Command *command, rapidjson::Document &d);
     void parseGetState(Command *command, rapidjson::Document &d);
+    void parseSetShipTargetLocation(Command *command, rapidjson::Document &d);
 };
 
 

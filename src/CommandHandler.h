@@ -28,6 +28,8 @@ protected:
     void handleInput(const std::string &commandString, int connection);
 
     int setupFdSet(int listen_fd, fd_set &readfds) const;
+
+    std::string handleSetShipTargetLocation(ParamsSetShipTargetLocation *params);
 };
 
 

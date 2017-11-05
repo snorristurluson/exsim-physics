@@ -16,7 +16,8 @@ typedef enum
     cmdStepSimulation,
     cmdGetState,
     cmdSetMain,
-    cmdSetViewer
+    cmdSetViewer,
+    cmdSetShipTargetLocation
 } CommandType;
 
 struct Params
@@ -39,6 +40,12 @@ struct ParamsAddShip : public Params
 struct ParamsStepSimulation : public Params
 {
     btScalar timestep;
+};
+
+struct ParamsSetShipTargetLocation : public Params
+{
+    esUserId ship;
+    btVector3 location;
 };
 
 struct Command

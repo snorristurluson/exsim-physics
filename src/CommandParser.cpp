@@ -57,6 +57,10 @@ Command *CommandParser::parse()
     {
         result->command = cmdSetViewer;
     }
+    else if(command == "setshiptargetlocation")
+    {
+        parseSetShipTargetLocation(result, d);
+    }
     else
     {
         result->command = cmdError;
@@ -123,6 +127,44 @@ void CommandParser::parseStepSimulation(Command *command, rapidjson::Document &d
 void CommandParser::parseGetState(Command *command, rapidjson::Document &d)
 {
     command->command = cmdGetState;
+}
+
+void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Document &d)
+{
+    if(!d.HasMember("ship") || !d.HasMember("location"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!d["ship"].IsInt64())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    const Value& location = d["location"].GetObject();
+    if(!location.HasMember("x") || !location.HasMember("y") || !location.HasMember("z"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!location["x"].IsNumber() || !location["y"].IsNumber() || !location["z"].IsNumber())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    auto params = new ParamsSetShipTargetLocation;
+    params->ship = d["ship"].GetInt64();
+    params->location = btVector3(
+            location["x"].GetDouble(),
+            location["y"].GetDouble(),
+            location["z"].GetDouble()
+    );
+    command->command = cmdSetShipTargetLocation;
+    command->params = params;
 }
 
 bool CommandParser::isDone()

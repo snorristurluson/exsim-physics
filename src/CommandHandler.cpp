@@ -171,6 +171,11 @@ std::string CommandHandler::handleCommand(Command *cmd)
         case cmdSetMain:
             return "{\"result\": \"ok\"}";
 
+        case cmdSetShipTargetLocation:
+            return handleSetShipTargetLocation(
+                    dynamic_cast<ParamsSetShipTargetLocation*>(cmd->params));
+            )
+
     }
     return "{\"result\": \"error\"}";
 }
@@ -197,4 +202,15 @@ std::string CommandHandler::handleStepSimulation(ParamsStepSimulation *params)
 std::string CommandHandler::handleGetState()
 {
     return m_solarsystem->getStateAsJson();
+}
+
+std::string CommandHandler::handleSetShipTargetLocation(ParamsSetShipTargetLocation *params)
+{
+    auto ship = m_solarsystem->findShip(params->ship);
+    if(!ship)
+    {
+        return "{\"result\": \"error\"}";
+    }
+    ship->setTargetLocation(params->location);
+    return "{\"result\": \"ok\"}";
 }

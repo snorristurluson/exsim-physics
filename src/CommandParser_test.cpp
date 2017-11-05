@@ -132,3 +132,18 @@ TEST(CommandParser, TwoCommandsInOne)
     EXPECT_EQ(cmdSetViewer, cmd->command);
     EXPECT_TRUE(parser.isDone());
 }
+
+TEST(CommandParser, SetShipTargetLocation)
+{
+    CommandParser parser;
+    parser.feed("{\"command\": \"setshiptargetlocation\", \"ship\": 1, \"location\": {\"x\": 100, \"y\": 100, \"z\": 0}}");
+    auto cmd = parser.parse();
+    EXPECT_EQ(cmdSetShipTargetLocation, cmd->command);
+
+    auto params = dynamic_cast<ParamsSetShipTargetLocation*>(cmd->params);
+    ASSERT_NE(nullptr, params);
+    EXPECT_EQ(1, params->ship);
+    EXPECT_FLOAT_EQ(100.0, params->location.x());
+    EXPECT_FLOAT_EQ(100.0, params->location.y());
+    EXPECT_FLOAT_EQ(0.0, params->location.z());
+}
