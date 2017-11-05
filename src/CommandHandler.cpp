@@ -174,10 +174,10 @@ std::string CommandHandler::handleCommand(Command *cmd)
         case cmdSetShipTargetLocation:
             return handleSetShipTargetLocation(
                     dynamic_cast<ParamsSetShipTargetLocation*>(cmd->params));
-            )
 
+        default:
+            return "{\"result\": \"error\"}";
     }
-    return "{\"result\": \"error\"}";
 }
 
 std::string CommandHandler::handleAddShip(ParamsAddShip *params)
