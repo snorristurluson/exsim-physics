@@ -9,6 +9,19 @@
 #include "CommandHandler.h"
 #include "CommandParser.h"
 
+std::vector<std::string> split(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim))
+    {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
 void CommandHandler::start(int port)
 {
     std::cout << "Starting solarsystem on port " << port << std::endl;
@@ -44,7 +57,6 @@ void CommandHandler::start(int port)
     {
         auto max_sd = setupFdSet(listen_fd, readfds);
 
-        std::cout << "Calling select with " << m_connections.size() << " connections" << std::endl;
         auto activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
         if(activity < 0)
         {
@@ -76,7 +88,6 @@ void CommandHandler::start(int port)
                 if(bytesRead)
                 {
                     std::string commandString(buffer);
-                    std::cout << commandString << std::endl;
                     handleInput(commandString, *it);
                 }
                 else
@@ -122,13 +133,16 @@ int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
 
 void CommandHandler::handleInput(const std::string &commandString, int connection)
 {
-    CommandParser parser;
-    parser.feed(commandString);
+    auto lines = split(commandString, '\n');
 
-    while(!parser.isDone())
+    for(auto line: lines)
     {
+        std::cout << line << std::endl;
+
+        CommandParser parser;
+        parser.feed(line);
+
         auto command = parser.parse();
-        std::cout << command->command << std::endl;
         if(command->command == cmdSetMain)
         {
             m_mainConnection = connection;
