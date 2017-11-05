@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include "btBulletDynamicsCommon.h"
 #include "Ship.h"
 
@@ -17,8 +18,13 @@ public:
     ~Solarsystem();
 
     void addShip(Ship* ship);
+    void removeShip(Ship* ship);
+    Ship* findShip(esUserId);
+
     void stepSimulation(btScalar timeStep);
+
     std::string getStateAsJson();
+    int getNumShips();
 
 protected:
     void addCollisionShape(btCollisionShape* shape);
@@ -26,6 +32,7 @@ protected:
 
 protected:
     std::vector<Ship*> m_ships;
+    std::map<esUserId, Ship*> m_shipsByOwner;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     btCollisionDispatcher* m_dispatcher;
     btBroadphaseInterface* m_overlappingPairCache;

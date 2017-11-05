@@ -1,23 +1,96 @@
 #include "gtest/gtest.h"
+#include "Solarsystem.h"
 
-int Factorial(int n) // Returns the factorial of n
+TEST(Solarsystem, CanCreate)
 {
-    if( n == 0)
+    auto ss = new Solarsystem;
+    delete ss;
+}
+
+TEST(Solarsystem, CanAddShip)
+{
+    auto ss = new Solarsystem;
+    auto ship = new Ship(1, 2);
+    ss->addShip(ship);
+}
+
+TEST(Solarsystem, FindShipFromOwner)
+{
+    auto ss = new Solarsystem;
+    auto ship = new Ship(1, 2);
+    ss->addShip(ship);
+
+    auto found = ss->findShip(1);
+
+    EXPECT_EQ(ship, found);
+}
+
+TEST(Solarsystem, FindShipFromOwnerReturnsNullWhenNotExists)
+{
+    auto ss = new Solarsystem;
+    auto found = ss->findShip(1);
+
+    EXPECT_EQ(nullptr, found);
+}
+
+TEST(Solarsystem, FindShipFromOwnerWithMultipleShips)
+{
+    auto ss = new Solarsystem;
+    auto first = new Ship(esUserId(0), 2);
+    ss->addShip(first);
+
+    for(int i = 1; i < 100; ++i)
     {
-        return 1;
+        auto ship = new Ship(esUserId(i), 2);
+        ss->addShip(ship);
     }
-    return Factorial(n - 1)*n;
+
+    auto found = ss->findShip(0);
+
+    EXPECT_EQ(first, found);
+    EXPECT_EQ(100, ss->getNumShips());
 }
 
-// Tests factorial of 0.
-TEST(FactorialTest, HandlesZeroInput) {
-EXPECT_EQ(1, Factorial(0));
+TEST(Solarsystem, AddSecondShipWithSameOwnerShouldNotAdd)
+{
+    auto ss = new Solarsystem;
+    auto first = new Ship(42, 2);
+    ss->addShip(first);
+
+    auto second = new Ship(42, 3);
+    ss->addShip(second);
+
+    auto found = ss->findShip(42);
+
+    EXPECT_EQ(first, found);
+    EXPECT_EQ(1, ss->getNumShips());
 }
 
-// Tests factorial of positive numbers.
-TEST(FactorialTest, HandlesPositiveInput) {
-EXPECT_EQ(1, Factorial(1));
-EXPECT_EQ(2, Factorial(2));
-EXPECT_EQ(6, Factorial(3));
-EXPECT_EQ(40320, Factorial(8));
+TEST(Solarsystem, RemoveShip)
+{
+    auto ss = new Solarsystem;
+    auto ship = new Ship(1, 2);
+    ss->addShip(ship);
+    ss->removeShip(ship);
+    auto found = ss->findShip(1);
+
+    EXPECT_EQ(nullptr, found);
+    EXPECT_EQ(0, ss->getNumShips());
 }
+
+TEST(Solarsystem, RemoveShipWithMultipleShips)
+{
+    auto ss = new Solarsystem;
+
+    for(int i = 0; i < 100; ++i)
+    {
+        auto ship = new Ship(esUserId(i), 2);
+        ss->addShip(ship);
+    }
+
+    auto target = ss->findShip(37);
+    ss->removeShip(target);
+
+    EXPECT_EQ(99, ss->getNumShips());
+}
+

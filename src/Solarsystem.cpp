@@ -3,6 +3,7 @@
 //
 
 #include <vector>
+#include <algorithm>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -69,10 +70,27 @@ void Solarsystem::stepSimulation(btScalar timeStep) {
 
 void Solarsystem::addShip(Ship *ship)
 {
+    if(findShip(ship->getOwner()))
+    {
+        return;
+    }
+
     ship->prepare();
     addCollisionShape(ship->getCollisionShape());
     addRigidBody(ship->getBody());
     m_ships.push_back(ship);
+
+    m_shipsByOwner[ship->getOwner()] = ship;
+}
+
+void Solarsystem::removeShip(Ship *ship)
+{
+    auto foundIt = m_shipsByOwner.find(ship->getOwner());
+    if(foundIt != m_shipsByOwner.end())
+    {
+        m_shipsByOwner.erase(foundIt);
+    }
+    m_ships.erase(std::remove(m_ships.begin(), m_ships.end(), ship));
 }
 
 std::string Solarsystem::getStateAsJson()
@@ -116,3 +134,19 @@ std::string Solarsystem::getStateAsJson()
 
     return buffer.GetString();
 }
+
+Ship *Solarsystem::findShip(esUserId owner)
+{
+    auto foundIt = m_shipsByOwner.find(owner);
+    if(foundIt == m_shipsByOwner.end())
+    {
+        return nullptr;
+    }
+    return foundIt->second;
+}
+
+int Solarsystem::getNumShips()
+{
+    return m_ships.size();
+}
+

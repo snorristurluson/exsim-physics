@@ -78,6 +78,7 @@ ADD_DEFINITIONS(-DBT_USE_DOUBLE_PRECISION)
 ADD_EXECUTABLE(exsim-physics
         src/main.cpp
         src/Solarsystem.cpp
+        src/Solarsystem.h
         src/Ship.cpp
         src/Ship.h
         src/Commands.h
@@ -90,6 +91,10 @@ ADD_EXECUTABLE(exsim-physics
 
 add_executable(solarsystem_test
         src/Solarsystem_test.cpp
+        src/Solarsystem.cpp
+        src/Solarsystem.h
+        src/Ship.cpp
+        src/Ship.h
 )
 target_link_libraries(solarsystem_test gtest_main)
 
