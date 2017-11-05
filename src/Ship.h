@@ -26,6 +26,10 @@ public:
     esUserId getOwner();
     esTypeId getType();
     btVector3 getPosition();
+    btVector3 getVelocity();
+
+    void setTargetLocation(const btVector3& loc);
+    void update(btScalar dt);
 
 protected:
     ATTRIBUTE_ALIGNED16(btTransform m_transform);
@@ -35,6 +39,7 @@ protected:
     btCollisionShape* m_collisionShape;
     btDefaultMotionState* m_motionState;
     btRigidBody* m_body;
+    btVector3 m_targetLocation;
 };
 
 

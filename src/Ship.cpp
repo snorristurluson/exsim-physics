@@ -34,7 +34,6 @@ void Ship::prepare()
             m_mass, m_motionState, m_collisionShape, localInertia
     );
     m_body = new btRigidBody(rbInfo);
-    m_body->setLinearVelocity(btVector3(15, 15, 0.0));
 }
 
 btCollisionShape *Ship::getCollisionShape()
@@ -62,4 +61,30 @@ btVector3 Ship::getPosition()
     btTransform t;
     m_motionState->getWorldTransform(t);
     return t.getOrigin();
+}
+
+btVector3 Ship::getVelocity()
+{
+    return m_body->getLinearVelocity();
+}
+
+void Ship::setTargetLocation(const btVector3 &loc)
+{
+    m_targetLocation = loc;
+}
+
+void Ship::update(btScalar dt)
+{
+    btVector3 velocity(0, 0, 0);
+
+    auto myPos = getPosition();
+    auto v = m_targetLocation - myPos;
+    auto distance = v.length();
+    if(distance > 1.0)
+    {
+        // Speed should come from the ship type and modifiers
+        velocity = v.normalized() * 20.0;
+    }
+
+    m_body->setLinearVelocity(velocity);
 }

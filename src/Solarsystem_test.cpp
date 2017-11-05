@@ -94,3 +94,23 @@ TEST(Solarsystem, RemoveShipWithMultipleShips)
     EXPECT_EQ(99, ss->getNumShips());
 }
 
+TEST(Solarsystem, SetShipTargetLocation)
+{
+    auto ss = new Solarsystem;
+    auto ship = new Ship(1, 2);
+    ss->addShip(ship);
+    ship->setTargetLocation(btVector3(100.0, 100.0, 0.0));
+
+    auto v = ship->getVelocity();
+    EXPECT_FLOAT_EQ(0.0, v.x());
+    EXPECT_FLOAT_EQ(0.0, v.y());
+    EXPECT_FLOAT_EQ(0.0, v.z());
+
+    ss->stepSimulation(0.250);
+
+    auto v2 = ship->getVelocity();
+    v2.normalize();
+    EXPECT_FLOAT_EQ(0.70710677, v2.x());
+    EXPECT_FLOAT_EQ(0.70710677, v2.y());
+    EXPECT_FLOAT_EQ(0.0, v.z());
+}

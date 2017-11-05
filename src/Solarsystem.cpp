@@ -56,15 +56,22 @@ Solarsystem::~Solarsystem() {
     delete m_collisionConfiguration;
 }
 
-void Solarsystem::addCollisionShape(btCollisionShape *shape) {
+void Solarsystem::addCollisionShape(btCollisionShape *shape)
+{
     m_collisionShapes.push_back(shape);
 }
 
-void Solarsystem::addRigidBody(btRigidBody *body) {
+void Solarsystem::addRigidBody(btRigidBody *body)
+{
     m_dynamicsWorld->addRigidBody(body);
 }
 
-void Solarsystem::stepSimulation(btScalar timeStep) {
+void Solarsystem::stepSimulation(btScalar timeStep)
+{
+    for(auto ship: m_ships)
+    {
+        ship->update(timeStep);
+    }
     m_dynamicsWorld->stepSimulation(timeStep);
 }
 
@@ -149,4 +156,3 @@ int Solarsystem::getNumShips()
 {
     return m_ships.size();
 }
-
