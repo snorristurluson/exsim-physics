@@ -3,6 +3,7 @@
 //
 
 #include <rapidjson/istreamwrapper.h>
+#include <iostream>
 #include "CommandParser.h"
 
 using namespace rapidjson;
@@ -170,5 +171,28 @@ void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Docu
 bool CommandParser::isDone()
 {
     return m_input.eof();
+}
+
+bool getwholeline(std::string& s, std::string& line)
+{
+    line = std::string();
+    for(int i = 0; i < s.size(); ++i)
+    {
+        auto next = s[i];
+        if(next == '\r')
+        {
+            continue;
+        }
+        if(next == '\n')
+        {
+            s = s.substr(i + 1);
+            return true;
+        }
+        line.push_back(next);
+    }
+
+    // If we made it this far it means the line is incomplete
+    line = std::string();
+    return false;
 }
 

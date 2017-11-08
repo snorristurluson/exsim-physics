@@ -5,6 +5,53 @@
 #include <gtest/gtest.h>
 #include "CommandParser.h"
 
+TEST(Utils, getwholeline)
+{
+    std::string input = "bingo\nbongo";
+    std::string line;
+    auto result = getwholeline(input, line);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(line, "bingo");
+}
+
+TEST(Utils, getwholeline_IncompleteSecondLine)
+{
+    std::string input = "bingo\nbon";
+    std::string firstLine;
+    std::string secondLine;
+
+    auto first = getwholeline(input, firstLine);
+    EXPECT_EQ(first, true);
+    EXPECT_EQ(firstLine, "bingo");
+    EXPECT_EQ(input, "bon");
+
+    auto second = getwholeline(input, secondLine);
+    EXPECT_EQ(second, false);
+    EXPECT_EQ(secondLine, "");
+    EXPECT_EQ(input, "bon");
+}
+
+TEST(Utils, getwholeline_IncompleteSecondLineIsCompleted)
+{
+    std::string input = "bingo\nbon";
+    std::string firstLine;
+    std::string secondLine;
+    auto first = getwholeline(input, firstLine);
+    EXPECT_EQ(first, true);
+    EXPECT_EQ(firstLine, "bingo");
+
+    auto second = getwholeline(input, secondLine);
+    EXPECT_EQ(second, false);
+    EXPECT_EQ(secondLine, "");
+
+    input += "go\n";
+    second = getwholeline(input, secondLine);
+    EXPECT_EQ(second, true);
+    EXPECT_EQ(secondLine, "bongo");
+    EXPECT_EQ(input, "");
+}
+
+
 TEST(CommandParser, CanCreate)
 {
     CommandParser parser;

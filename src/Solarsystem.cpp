@@ -134,6 +134,7 @@ std::string Solarsystem::getStateAsJson()
 
     d.SetObject();
     d.AddMember("state", state, d.GetAllocator());
+    d.AddMember("result", "state", d.GetAllocator());
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);

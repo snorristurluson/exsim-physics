@@ -19,6 +19,7 @@ protected:
     Solarsystem* m_solarsystem;
     int m_mainConnection;
     std::vector<int> m_connections;
+    std::string m_input;
 
     std::string handleCommand(Command *cmd);
     std::string handleAddShip(ParamsAddShip *params);

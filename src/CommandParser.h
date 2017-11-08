@@ -27,5 +27,6 @@ protected:
     void parseSetShipTargetLocation(Command *command, rapidjson::Document &d);
 };
 
+bool getwholeline(std::string& s, std::string& line);
 
 #endif //PROJECT_COMMANDPARSER_H

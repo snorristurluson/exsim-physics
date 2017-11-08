@@ -9,19 +9,6 @@
 #include "CommandHandler.h"
 #include "CommandParser.h"
 
-std::vector<std::string> split(const std::string &s, char delim)
-{
-    std::vector<std::string> elems;
-
-    std::stringstream ss(s);
-    std::string item;
-    while(std::getline(ss, item, delim))
-    {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
 void CommandHandler::start(int port)
 {
     std::cout << "Starting solarsystem on port " << port << std::endl;
@@ -87,7 +74,7 @@ void CommandHandler::start(int port)
                 bytesRead = read(*it, buffer, sizeof(buffer));
                 if(bytesRead)
                 {
-                    std::string commandString(buffer);
+                    std::string commandString(buffer, bytesRead);
                     handleInput(commandString, *it);
                 }
                 else
@@ -133,19 +120,24 @@ int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
 
 void CommandHandler::handleInput(const std::string &commandString, int connection)
 {
-    auto lines = split(commandString, '\n');
-
-    for(auto line: lines)
+    if((connection != m_mainConnection) && (m_mainConnection != -1))
     {
+        std::cout << "Unexpected input from viewer connection" << std::endl;
+        std::cout << commandString << std::endl;
+        return;
+    }
+
+    m_input += commandString;
+
+    std::string line;
+    auto gotLine = getwholeline(m_input, line);
+    while(gotLine)
+    {
+        std::cout << line << std::endl;
         CommandParser parser;
         parser.feed(line);
 
         auto command = parser.parse();
-        if(command->command == cmdSetMain)
-        {
-            m_mainConnection = connection;
-        }
-
         auto response = handleCommand(command);
 
         if(response.size())
@@ -159,6 +151,7 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
                 }
             }
         }
+        gotLine = getwholeline(m_input, line);
     }
 }
 
