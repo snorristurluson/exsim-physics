@@ -36,6 +36,9 @@ public:
     void setInRange(const ShipSet& ships);
     ShipSet getInRange() const;
 
+    btScalar getSensorRange() const;
+    btScalar getRadius() const;
+
 protected:
     ATTRIBUTE_ALIGNED16(btTransform m_transform);
     esUserId m_owner;
@@ -49,6 +52,7 @@ protected:
     btRigidBody* m_sensor;
     btVector3 m_targetLocation;
     ShipSet m_inRange;
+    ShipSet m_prevInRange;
 };
 
 

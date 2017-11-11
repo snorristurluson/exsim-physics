@@ -79,7 +79,6 @@ void Solarsystem::stepSimulation(btScalar timeStep)
     auto numManifolds = dispatcher->getNumManifolds();
 
     std::map<Ship*, ShipSet> shipsInRange;
-    std::map<Ship*, ShipSet> shipsInContact;
     for (int i = 0; i < numManifolds; i++)
     {
         btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
@@ -106,28 +105,32 @@ void Solarsystem::stepSimulation(btScalar timeStep)
         if(typeA == esShip && typeB == esShip)
         {
             // Two ships colliding
-            shipsInContact[shipA].insert(shipB);
+            continue;
         }
 
-        if(typeA == esShip)
+        auto posA = shipA->getPosition();
+        auto posB = shipB->getPosition();
+        auto v = posA - posB;
+        auto distance = v.length();
+
+        if(typeA == esShip && typeB == esSensor)
         {
-            shipsInRange[shipB].insert(shipA);
+            if(distance < shipB->getSensorRange() + shipA->getRadius())
+            {
+                shipsInRange[shipB].insert(shipA);
+            }
         }
-        if(typeB == esShip)
+        if(typeB == esShip && typeA == esSensor)
         {
-            shipsInRange[shipA].insert(shipB);
+            if(distance < shipA->getSensorRange() + shipB->getRadius())
+            {
+                shipsInRange[shipA].insert(shipB);
+            }
         }
     }
 
     for(auto it: shipsInRange)
     {
-        std::cout << it.first->getOwner() << " -> (";
-        for(auto ship: it.second)
-        {
-            std::cout << ship->getOwner() << ", ";
-        }
-        std::cout << ")" << std::endl;
-
         it.first->setInRange(it.second);
     }
 }
@@ -191,6 +194,8 @@ std::string Solarsystem::getStateAsJson()
         Value inRange;
         inRange.SetArray();
         auto shipsInRange = ship->getInRange();
+
+        btVector3 pos = ship->getPosition();
         for(auto shipInRange: shipsInRange)
         {
             inRange.PushBack((int64_t)shipInRange->getOwner(), d.GetAllocator());

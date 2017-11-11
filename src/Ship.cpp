@@ -40,6 +40,8 @@ void Ship::prepare()
     m_body = new btRigidBody(rbInfo);
     m_body->setUserPointer(reinterpret_cast<void*>(this));
     m_body->setUserIndex(esShip);
+    m_body->setLinearFactor(btVector3(1, 1, 0));
+    m_body->setActivationState(DISABLE_DEACTIVATION);
 
     m_sensorShape->calculateLocalInertia(m_mass, localInertia);
     m_sensorMotionState = new btDefaultMotionState(m_transform);
@@ -54,6 +56,8 @@ void Ship::prepare()
     );
     m_sensor->setUserPointer(reinterpret_cast<void*>(this));
     m_sensor->setUserIndex(esSensor);
+    m_sensor->setLinearFactor(btVector3(1, 1, 0));
+    m_sensor->setActivationState(DISABLE_DEACTIVATION);
 }
 
 btCollisionShape *Ship::getCollisionShape() const
@@ -125,6 +129,9 @@ void Ship::update(btScalar dt)
     btTransform t;
     m_motionState->getWorldTransform(t);
     m_sensorMotionState->setWorldTransform(t);
+
+    m_prevInRange = m_inRange;
+    m_inRange.clear();
 }
 
 void Ship::setInRange(const ShipSet &ships)
@@ -135,4 +142,14 @@ void Ship::setInRange(const ShipSet &ships)
 ShipSet Ship::getInRange() const
 {
     return m_inRange;
+}
+
+btScalar Ship::getRadius() const
+{
+    return 10;
+}
+
+btScalar Ship::getSensorRange() const
+{
+    return 100;
 }
