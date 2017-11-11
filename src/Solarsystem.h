@@ -28,7 +28,7 @@ public:
 
 protected:
     void addCollisionShape(btCollisionShape* shape);
-    void addRigidBody(btRigidBody* body);
+    void addRigidBody(btRigidBody* body, int group, int mask);
 
 protected:
     std::vector<Ship*> m_ships;

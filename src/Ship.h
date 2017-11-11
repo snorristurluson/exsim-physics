@@ -20,16 +20,21 @@ public:
 
     void prepare();
 
-    btCollisionShape* getCollisionShape();
-    btRigidBody* getBody();
+    btCollisionShape* getCollisionShape() const;
+    btRigidBody* getBody() const;
+    btCollisionShape* getSensorCollisionShape() const;
+    btRigidBody* getSensorBody() const;
 
-    esUserId getOwner();
-    esTypeId getType();
-    btVector3 getPosition();
-    btVector3 getVelocity();
+    esUserId getOwner() const;
+    esTypeId getType() const;
+    btVector3 getPosition() const;
+    btVector3 getVelocity() const;
 
     void setTargetLocation(const btVector3& loc);
     void update(btScalar dt);
+
+    void setInRange(const ShipSet& ships);
+    ShipSet getInRange() const;
 
 protected:
     ATTRIBUTE_ALIGNED16(btTransform m_transform);
@@ -37,9 +42,13 @@ protected:
     esTypeId m_type;
     btScalar m_mass;
     btCollisionShape* m_collisionShape;
+    btCollisionShape* m_sensorShape;
     btDefaultMotionState* m_motionState;
+    btDefaultMotionState* m_sensorMotionState;
     btRigidBody* m_body;
+    btRigidBody* m_sensor;
     btVector3 m_targetLocation;
+    ShipSet m_inRange;
 };
 
 

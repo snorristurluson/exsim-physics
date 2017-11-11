@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -61,9 +62,9 @@ void Solarsystem::addCollisionShape(btCollisionShape *shape)
     m_collisionShapes.push_back(shape);
 }
 
-void Solarsystem::addRigidBody(btRigidBody *body)
+void Solarsystem::addRigidBody(btRigidBody *body, int group, int mask)
 {
-    m_dynamicsWorld->addRigidBody(body);
+    m_dynamicsWorld->addRigidBody(body, group, mask);
 }
 
 void Solarsystem::stepSimulation(btScalar timeStep)
@@ -73,6 +74,62 @@ void Solarsystem::stepSimulation(btScalar timeStep)
         ship->update(timeStep);
     }
     m_dynamicsWorld->stepSimulation(timeStep);
+
+    auto dispatcher = m_dynamicsWorld->getDispatcher();
+    auto numManifolds = dispatcher->getNumManifolds();
+
+    std::map<Ship*, ShipSet> shipsInRange;
+    std::map<Ship*, ShipSet> shipsInContact;
+    for (int i = 0; i < numManifolds; i++)
+    {
+        btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+        const btCollisionObject* obA = contactManifold->getBody0();
+        const btCollisionObject* obB = contactManifold->getBody1();
+
+        auto typeA = obA->getUserIndex();
+        auto typeB = obB->getUserIndex();
+        if(typeA == esSensor && typeB == esSensor)
+        {
+            // Don't care about sensors overlapping
+            continue;
+        }
+
+        auto shipA = reinterpret_cast<Ship*>(obA->getUserPointer());
+        auto shipB = reinterpret_cast<Ship*>(obB->getUserPointer());
+
+        if(shipA == shipB)
+        {
+            // Don't care about the ship and its own sensor
+            continue;
+        }
+
+        if(typeA == esShip && typeB == esShip)
+        {
+            // Two ships colliding
+            shipsInContact[shipA].insert(shipB);
+        }
+
+        if(typeA == esShip)
+        {
+            shipsInRange[shipB].insert(shipA);
+        }
+        if(typeB == esShip)
+        {
+            shipsInRange[shipA].insert(shipB);
+        }
+    }
+
+    for(auto it: shipsInRange)
+    {
+        std::cout << it.first->getOwner() << " -> (";
+        for(auto ship: it.second)
+        {
+            std::cout << ship->getOwner() << ", ";
+        }
+        std::cout << ")" << std::endl;
+
+        it.first->setInRange(it.second);
+    }
 }
 
 void Solarsystem::addShip(Ship *ship)
@@ -84,7 +141,9 @@ void Solarsystem::addShip(Ship *ship)
 
     ship->prepare();
     addCollisionShape(ship->getCollisionShape());
-    addRigidBody(ship->getBody());
+    addCollisionShape(ship->getSensorCollisionShape());
+    addRigidBody(ship->getBody(), 1, 0xffffffff);
+    addRigidBody(ship->getSensorBody(), 2, 1);
     m_ships.push_back(ship);
 
     m_shipsByOwner[ship->getOwner()] = ship;
@@ -128,6 +187,15 @@ std::string Solarsystem::getStateAsJson()
         positionData.AddMember("z", Value(position.z()), d.GetAllocator());
 
         shipData.AddMember("position", positionData, d.GetAllocator());
+
+        Value inRange;
+        inRange.SetArray();
+        auto shipsInRange = ship->getInRange();
+        for(auto shipInRange: shipsInRange)
+        {
+            inRange.PushBack((int64_t)shipInRange->getOwner(), d.GetAllocator());
+        }
+        shipData.AddMember("inrange", inRange, d.GetAllocator());
 
         ships.PushBack(shipData, d.GetAllocator());
     }

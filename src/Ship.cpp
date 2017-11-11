@@ -10,10 +10,13 @@ Ship::Ship(esUserId owner, esTypeId shipType) :
     m_owner(owner),
     m_type(shipType),
     m_body(nullptr),
-    m_collisionShape(nullptr)
+    m_sensor(nullptr),
+    m_collisionShape(nullptr),
+    m_sensorShape(nullptr)
 {
     // Todo: Details should come from shipType
-    m_collisionShape = new btSphereShape(1.0);
+    m_collisionShape = new btSphereShape(10.0);
+    m_sensorShape = new btSphereShape(100.0);
     m_mass = btScalar(1.f);
     m_transform.setIdentity();
 }
@@ -35,36 +38,62 @@ void Ship::prepare()
             m_mass, m_motionState, m_collisionShape, localInertia
     );
     m_body = new btRigidBody(rbInfo);
+    m_body->setUserPointer(reinterpret_cast<void*>(this));
+    m_body->setUserIndex(esShip);
+
+    m_sensorShape->calculateLocalInertia(m_mass, localInertia);
+    m_sensorMotionState = new btDefaultMotionState(m_transform);
+    btRigidBody::btRigidBodyConstructionInfo sensorRbInfo(
+            m_mass, m_sensorMotionState, m_sensorShape, localInertia
+    );
+    m_sensor = new btRigidBody(sensorRbInfo);
+
+    m_sensor->setCollisionFlags(
+            btCollisionObject::CF_KINEMATIC_OBJECT |
+            btCollisionObject::CF_NO_CONTACT_RESPONSE
+    );
+    m_sensor->setUserPointer(reinterpret_cast<void*>(this));
+    m_sensor->setUserIndex(esSensor);
 }
 
-btCollisionShape *Ship::getCollisionShape()
+btCollisionShape *Ship::getCollisionShape() const
 {
     return m_collisionShape;
 }
 
-btRigidBody *Ship::getBody()
+btRigidBody *Ship::getBody() const
 {
     return m_body;
 }
 
-esUserId Ship::getOwner()
+btCollisionShape *Ship::getSensorCollisionShape() const
+{
+    return m_sensorShape;
+}
+
+btRigidBody *Ship::getSensorBody() const
+{
+    return m_sensor;
+}
+
+esUserId Ship::getOwner() const
 {
     return m_owner;
 }
 
-esTypeId Ship::getType()
+esTypeId Ship::getType() const
 {
     return m_type;
 }
 
-btVector3 Ship::getPosition()
+btVector3 Ship::getPosition() const
 {
     btTransform t;
     m_motionState->getWorldTransform(t);
     return t.getOrigin();
 }
 
-btVector3 Ship::getVelocity()
+btVector3 Ship::getVelocity() const
 {
     return m_body->getLinearVelocity();
 }
@@ -92,4 +121,18 @@ void Ship::update(btScalar dt)
     }
 
     m_body->setLinearVelocity(velocity);
+
+    btTransform t;
+    m_motionState->getWorldTransform(t);
+    m_sensorMotionState->setWorldTransform(t);
+}
+
+void Ship::setInRange(const ShipSet &ships)
+{
+    m_inRange = ships;
+}
+
+ShipSet Ship::getInRange() const
+{
+    return m_inRange;
 }
