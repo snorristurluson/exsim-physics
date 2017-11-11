@@ -120,6 +120,18 @@ TEST(CommandParser, AddShipCommandWithInvalidPositionOwner)
     EXPECT_EQ(nullptr, cmd->params);
 }
 
+TEST(CommandParser, RemoveShipCommand)
+{
+    CommandParser parser;
+    parser.feed("{\"command\": \"removeship\", \"owner\": 1}");
+    auto cmd = parser.parse();
+
+    EXPECT_EQ(cmdRemoveShip, cmd->command);
+    auto paramsRemoveShip = dynamic_cast<ParamsRemoveShip*>(cmd->params);
+    ASSERT_NE(nullptr, paramsRemoveShip);
+    EXPECT_EQ(1, paramsRemoveShip->owner);
+}
+
 TEST(CommandParser, StepSimulationCommand)
 {
     CommandParser parser;

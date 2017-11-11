@@ -98,6 +98,7 @@ void Solarsystem::removeShip(Ship *ship)
         m_shipsByOwner.erase(foundIt);
     }
     m_ships.erase(std::remove(m_ships.begin(), m_ships.end(), ship));
+    m_dynamicsWorld->removeRigidBody(ship->getBody());
 }
 
 std::string Solarsystem::getStateAsJson()

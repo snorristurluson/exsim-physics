@@ -23,6 +23,7 @@ protected:
 
     std::string handleCommand(Command *cmd);
     std::string handleAddShip(ParamsAddShip *params);
+    std::string handleRemoveShip(ParamsRemoveShip* params);
     std::string handleStepSimulation(ParamsStepSimulation *params);
     std::string handleGetState();
 

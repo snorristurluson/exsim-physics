@@ -16,11 +16,11 @@ void CommandHandler::start(int port)
     m_solarsystem = new Solarsystem;
     m_mainConnection = -1;
 
-    fd_set readfds;
+    fd_set readfds = {};
 
     int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    struct sockaddr_in serv_addr;
+    struct sockaddr_in serv_addr = {};
     bzero((char *) &serv_addr, sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
@@ -35,7 +35,7 @@ void CommandHandler::start(int port)
 
     listen(listen_fd, 5);
 
-    struct sockaddr_in client_addr;
+    struct sockaddr_in client_addr = {};
     socklen_t client_addr_len = sizeof(client_addr);
 
     char buffer[4096];
@@ -44,7 +44,7 @@ void CommandHandler::start(int port)
     {
         auto max_sd = setupFdSet(listen_fd, readfds);
 
-        auto activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+        auto activity = select( max_sd + 1 , &readfds, nullptr, nullptr, nullptr);
         if(activity < 0)
         {
             std::cout << "select error" << std::endl;
@@ -74,7 +74,7 @@ void CommandHandler::start(int port)
                 bytesRead = read(*it, buffer, sizeof(buffer));
                 if(bytesRead)
                 {
-                    std::string commandString(buffer, bytesRead);
+                    std::string commandString(buffer, static_cast<unsigned long>(bytesRead));
                     handleInput(commandString, *it);
                 }
                 else
@@ -107,7 +107,7 @@ int CommandHandler::setupFdSet(int listen_fd, fd_set &readfds) const
     {
         if(fd > 0)
         {
-            FD_SET( fd , &readfds);
+            FD_SET(fd, &readfds);
         }
 
         if(fd > max_sd)
@@ -140,14 +140,14 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
         auto command = parser.parse();
         auto response = handleCommand(command);
 
-        if(response.size())
+        if(!response.empty())
         {
-            for(auto connection: m_connections)
+            for(auto conn: m_connections)
             {
-                write(connection, response.c_str(), response.size());
+                write(conn, response.c_str(), response.size());
                 if(response.back() != '\n')
                 {
-                    write(connection, "\n", 1);
+                    write(conn, "\n", 1);
                 }
             }
         }
@@ -160,11 +160,15 @@ std::string CommandHandler::handleCommand(Command *cmd)
     switch(cmd->command)
     {
         case cmdError:
-            return "{\"result\": \"error\"}";
+            return R"({"result": "error"})";
 
         case cmdAddShip:
             return handleAddShip(
                     dynamic_cast<ParamsAddShip*>(cmd->params));
+
+        case cmdRemoveShip:
+            return handleRemoveShip(
+                    dynamic_cast<ParamsRemoveShip*>(cmd->params));
 
         case cmdStepSimulation:
             return handleStepSimulation(
@@ -174,14 +178,14 @@ std::string CommandHandler::handleCommand(Command *cmd)
             return handleGetState();
 
         case cmdSetMain:
-            return "{\"result\": \"ok\"}";
+            return R"({"result": "ok"})";
 
         case cmdSetShipTargetLocation:
             return handleSetShipTargetLocation(
                     dynamic_cast<ParamsSetShipTargetLocation*>(cmd->params));
 
         default:
-            return "{\"result\": \"error\"}";
+            return R"({"result": "error"})";
     }
 }
 
@@ -195,13 +199,25 @@ std::string CommandHandler::handleAddShip(ParamsAddShip *params)
     ship->setTransform(t);
     m_solarsystem->addShip(ship);
 
-    return "{\"result\": \"ok\"}";
+    return R"({"result": "ok"})";
+}
+
+std::string CommandHandler::handleRemoveShip(ParamsRemoveShip *params)
+{
+    auto ship = m_solarsystem->findShip(params->owner);
+    if(!ship)
+    {
+        std::cout << "Ship not found: " << params->owner << std::endl;
+        return R"({"result": "error"})";
+    }
+    m_solarsystem->removeShip(ship);
+    return R"({"result": "ok"})";
 }
 
 std::string CommandHandler::handleStepSimulation(ParamsStepSimulation *params)
 {
     m_solarsystem->stepSimulation(params->timestep);
-    return "{\"result\": \"ok\"}";
+    return R"({"result": "ok"})";
 }
 
 std::string CommandHandler::handleGetState()
@@ -214,8 +230,8 @@ std::string CommandHandler::handleSetShipTargetLocation(ParamsSetShipTargetLocat
     auto ship = m_solarsystem->findShip(params->ship);
     if(!ship)
     {
-        return "{\"result\": \"error\"}";
+        return R"({"result": "error"})";
     }
     ship->setTargetLocation(params->location);
-    return "{\"result\": \"ok\"}";
+    return R"({"result": "ok"})";
 }

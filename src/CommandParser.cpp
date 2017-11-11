@@ -42,6 +42,10 @@ Command *CommandParser::parse()
     {
         parseAddShip(result, d);
     }
+    else if(command == "removeship")
+    {
+        parseRemoveShip(result, d);
+    }
     else if(command == "stepsimulation")
     {
         parseStepSimulation(result, d );
@@ -165,6 +169,27 @@ void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Docu
             location["z"].GetDouble()
     );
     command->command = cmdSetShipTargetLocation;
+    command->params = params;
+}
+
+void CommandParser::parseRemoveShip(Command *command, rapidjson::Document& d)
+{
+    if(!d.HasMember("owner"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!d["owner"].IsInt64())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    command->command = cmdRemoveShip;
+
+    auto params = new ParamsRemoveShip;
+    params->owner = d["owner"].GetInt64();
     command->params = params;
 }
 

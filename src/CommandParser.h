@@ -25,6 +25,7 @@ protected:
     void parseStepSimulation(Command *command, rapidjson::Document &d);
     void parseGetState(Command *command, rapidjson::Document &d);
     void parseSetShipTargetLocation(Command *command, rapidjson::Document &d);
+    void parseRemoveShip(Command *cmd, rapidjson::Document& d);
 };
 
 bool getwholeline(std::string& s, std::string& line);

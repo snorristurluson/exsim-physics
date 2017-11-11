@@ -13,6 +13,7 @@ typedef enum
 {
     cmdError = -1,
     cmdAddShip,
+    cmdRemoveShip,
     cmdStepSimulation,
     cmdGetState,
     cmdSetMain,
@@ -35,6 +36,11 @@ struct ParamsAddShip : public Params
     esUserId owner;
     esTypeId typeId;
     btVector3 position;
+};
+
+struct ParamsRemoveShip : public Params
+{
+    esUserId owner;
 };
 
 struct ParamsStepSimulation : public Params
