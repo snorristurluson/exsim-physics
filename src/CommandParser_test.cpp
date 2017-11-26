@@ -195,7 +195,7 @@ TEST(CommandParser, TwoCommandsInOne)
 TEST(CommandParser, SetShipTargetLocation)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"setshiptargetlocation\", \"params\": {\"ship\": 1, \"location\": {\"x\": 100, \"y\": 100, \"z\": 0}}}");
+    parser.feed("{\"command\": \"setshiptargetlocation\", \"params\": {\"shipid\": 1, \"location\": {\"x\": 100, \"y\": 100, \"z\": 0}}}");
     auto cmd = parser.parse();
     EXPECT_EQ(cmdSetShipTargetLocation, cmd->command);
 
