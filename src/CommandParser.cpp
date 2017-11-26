@@ -8,16 +8,6 @@
 
 using namespace rapidjson;
 
-std::string str_tolower(std::string s) {
-    std::transform(
-            s.begin(),
-            s.end(),
-            s.begin(),
-            [](unsigned char c){ return std::tolower(c); }
-    );
-    return s;
-}
-
 void CommandParser::feed(const std::string &input)
 {
     m_input << input;
@@ -48,7 +38,6 @@ Command *CommandParser::parse()
     }
 
     std::string command = d["command"].GetString();
-    command = str_tolower(command);
 
     if(command == "addship")
     {
