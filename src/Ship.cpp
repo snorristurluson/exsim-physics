@@ -117,11 +117,11 @@ void Ship::update(btScalar dt)
     if(distance > 1.0)
     {
         // Speed should come from the ship type and modifiers
-        velocity = v.normalized() * 50.0;
+        velocity = v.normalized() * 150.0;
     }
     else
     {
-        std::cout << "Ship " << m_owner << "close to target" << std::endl;
+        std::cout << "Ship " << m_owner << " close to target" << std::endl;
     }
 
     m_body->setLinearVelocity(velocity);
@@ -129,19 +129,44 @@ void Ship::update(btScalar dt)
     btTransform t;
     m_motionState->getWorldTransform(t);
     m_sensorMotionState->setWorldTransform(t);
-
-    m_prevInRange = m_inRange;
-    m_inRange.clear();
 }
 
 void Ship::setInRange(const ShipSet &ships)
 {
+    m_prevInRange = m_inRange;
     m_inRange = ships;
+    m_newInRange.clear();
+    m_goneFromRange.clear();
+
+    for(auto s: m_inRange)
+    {
+        if(m_prevInRange.find(s) == m_prevInRange.end())
+        {
+            m_newInRange.insert(s);
+        }
+    }
+    for(auto s: m_prevInRange)
+    {
+        if(m_inRange.find(s) == m_inRange.end())
+        {
+            m_goneFromRange.insert(s);
+        }
+    }
 }
 
 ShipSet Ship::getInRange() const
 {
     return m_inRange;
+}
+
+ShipSet Ship::getNewInRange() const
+{
+    return m_newInRange;
+}
+
+ShipSet Ship::getGoneFromRange() const
+{
+    return m_goneFromRange;
 }
 
 btScalar Ship::getRadius() const
@@ -153,3 +178,4 @@ btScalar Ship::getSensorRange() const
 {
     return 100;
 }
+

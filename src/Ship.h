@@ -35,6 +35,8 @@ public:
 
     void setInRange(const ShipSet& ships);
     ShipSet getInRange() const;
+    ShipSet getNewInRange() const;
+    ShipSet getGoneFromRange() const;
 
     btScalar getSensorRange() const;
     btScalar getRadius() const;
@@ -53,6 +55,8 @@ protected:
     btVector3 m_targetLocation;
     ShipSet m_inRange;
     ShipSet m_prevInRange;
+    ShipSet m_newInRange;
+    ShipSet m_goneFromRange;
 };
 
 

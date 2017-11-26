@@ -6,11 +6,18 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
+#include <csignal>
 #include "CommandHandler.h"
 #include "CommandParser.h"
 
+void signal_handler(int signal)
+{
+}
+
 void CommandHandler::start(int port)
 {
+    std::signal(SIGPIPE, signal_handler);
+
     std::cout << "Starting solarsystem on port " << port << std::endl;
 
     m_solarsystem = new Solarsystem;
@@ -83,6 +90,7 @@ void CommandHandler::start(int port)
                     std::cout << "Connection closed" << std::endl;
                     if(*it == m_mainConnection)
                     {
+                        std::cout << "Resetting solarsystem" << std::endl;
                         delete m_solarsystem;
                         m_solarsystem = new Solarsystem;
                         m_mainConnection = -1;
@@ -133,15 +141,21 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
     auto gotLine = getwholeline(m_input, line);
     while(gotLine)
     {
-        std::cout << line << std::endl;
+        // std::cout << line << std::endl;
         CommandParser parser;
         parser.feed(line);
 
         auto command = parser.parse();
         auto response = handleCommand(command);
 
+        if(command->command == cmdSetMain)
+        {
+            m_mainConnection = connection;
+        }
+
         if(!response.empty())
         {
+            btClock clock;
             for(auto conn: m_connections)
             {
                 write(conn, response.c_str(), response.size());
@@ -150,6 +164,9 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
                     write(conn, "\n", 1);
                 }
             }
+            auto duration = clock.getTimeSeconds() * 1000.0;
+            std::cout << "write: " << duration << std::endl;
+
         }
         gotLine = getwholeline(m_input, line);
     }

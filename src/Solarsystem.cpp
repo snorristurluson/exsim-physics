@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -69,6 +70,8 @@ void Solarsystem::addRigidBody(btRigidBody *body, int group, int mask)
 
 void Solarsystem::stepSimulation(btScalar timeStep)
 {
+    btClock clock;
+
     for(auto ship: m_ships)
     {
         ship->update(timeStep);
@@ -133,6 +136,9 @@ void Solarsystem::stepSimulation(btScalar timeStep)
     {
         it.first->setInRange(it.second);
     }
+
+    auto duration = clock.getTimeSeconds();
+    // std::cout << "stepSimulation: " << duration << std::endl;
 }
 
 void Solarsystem::addShip(Ship *ship)
@@ -163,15 +169,29 @@ void Solarsystem::removeShip(Ship *ship)
     m_dynamicsWorld->removeRigidBody(ship->getBody());
 }
 
+Value shipSetToArray(const ShipSet &shipSet, Document &d)
+{
+    Value array;
+    array.SetArray();
+
+    for(auto shipInRange: shipSet)
+    {
+        array.PushBack((int64_t)shipInRange->getOwner(), d.GetAllocator());
+    }
+    return array;
+}
+
 std::string Solarsystem::getStateAsJson()
 {
+    btClock clock;
+
     Document d;
 
     Value state;
     state.SetObject();
 
     Value ships;
-    ships.SetArray();
+    ships.SetObject();
     for(auto ship: m_ships)
     {
         Value shipData;
@@ -191,18 +211,21 @@ std::string Solarsystem::getStateAsJson()
 
         shipData.AddMember("position", positionData, d.GetAllocator());
 
-        Value inRange;
-        inRange.SetArray();
-        auto shipsInRange = ship->getInRange();
-
-        btVector3 pos = ship->getPosition();
-        for(auto shipInRange: shipsInRange)
-        {
-            inRange.PushBack((int64_t)shipInRange->getOwner(), d.GetAllocator());
-        }
+        Value inRange = shipSetToArray(ship->getInRange(), d);
         shipData.AddMember("inrange", inRange, d.GetAllocator());
 
-        ships.PushBack(shipData, d.GetAllocator());
+        Value newInRange = shipSetToArray(ship->getNewInRange(), d);
+        shipData.AddMember("newinrange", newInRange, d.GetAllocator());
+
+        Value goneFromRange = shipSetToArray(ship->getGoneFromRange(), d);
+        shipData.AddMember("gonefromrange", goneFromRange, d.GetAllocator());
+
+        std::stringstream ss;
+        ss << "ship_" << ship->getOwner();
+
+        Value shipId;
+        shipId.SetString(ss.str().c_str(), d.GetAllocator());
+        ships.AddMember(shipId, shipData, d.GetAllocator());
     }
     state.AddMember("ships", ships, d.GetAllocator());
 
@@ -214,7 +237,12 @@ std::string Solarsystem::getStateAsJson()
     Writer<StringBuffer> writer(buffer);
     d.Accept(writer);
 
-    return buffer.GetString();
+    auto duration = clock.getTimeSeconds();
+    // std::cout << "getStateAsJson: " << duration << std::endl;
+
+    std::string result = buffer.GetString();
+    // std::cout << result << std::endl;
+    return result.c_str();
 }
 
 Ship *Solarsystem::findShip(esUserId owner)

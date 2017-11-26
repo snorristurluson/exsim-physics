@@ -8,6 +8,16 @@
 
 using namespace rapidjson;
 
+std::string str_tolower(std::string s) {
+    std::transform(
+            s.begin(),
+            s.end(),
+            s.begin(),
+            [](unsigned char c){ return std::tolower(c); }
+    );
+    return s;
+}
+
 void CommandParser::feed(const std::string &input)
 {
     m_input << input;
@@ -38,6 +48,8 @@ Command *CommandParser::parse()
     }
 
     std::string command = d["command"].GetString();
+    command = str_tolower(command);
+
     if(command == "addship")
     {
         parseAddShip(result, d);
@@ -75,20 +87,28 @@ Command *CommandParser::parse()
 
 void CommandParser::parseAddShip(Command *command, Document &d)
 {
-    if(!d.HasMember("owner") || !d.HasMember("type") || !d.HasMember("position"))
+    if(!d.HasMember("params") || !d["params"].IsObject())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    auto rawParams = d["params"].GetObject();
+
+    if(!rawParams.HasMember("owner") || !rawParams.HasMember("typeid") || !rawParams.HasMember("position"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!rawParams["owner"].IsInt64() || !rawParams["typeid"].IsInt64() || !rawParams["position"].IsObject())
     {
         command->command = cmdError;
         return;
     }
 
     command->command = cmdAddShip;
-    if(!d["owner"].IsInt64() || !d["type"].IsInt64() || !d["position"].IsObject())
-    {
-        command->command = cmdError;
-        return;
-    }
-
-    const Value& position = d["position"].GetObject();
+    const Value& position = rawParams["position"].GetObject();
     if(!position.HasMember("x") || !position.HasMember("y") || !position.HasMember("z"))
     {
         command->command = cmdError;
@@ -102,8 +122,8 @@ void CommandParser::parseAddShip(Command *command, Document &d)
     }
 
     auto params = new ParamsAddShip;
-    params->owner = d["owner"].GetInt64();
-    params->typeId = d["type"].GetInt64();
+    params->owner = rawParams["owner"].GetInt64();
+    params->typeId = rawParams["typeid"].GetInt64();
 
     auto x = position["x"].GetDouble();
     auto y = position["y"].GetDouble();
@@ -116,15 +136,23 @@ void CommandParser::parseAddShip(Command *command, Document &d)
 
 void CommandParser::parseStepSimulation(Command *command, rapidjson::Document &d)
 {
-    command->command = cmdStepSimulation;
-    auto params = new ParamsStepSimulation;
-
-    if(!d.HasMember("timestep") || !d["timestep"].IsNumber())
+    if(!d.HasMember("params") || !d["params"].IsObject())
     {
         command->command = cmdError;
         return;
     }
-    params->timestep = d["timestep"].GetDouble();
+
+    auto rawParams = d["params"].GetObject();
+
+    command->command = cmdStepSimulation;
+    auto params = new ParamsStepSimulation;
+
+    if(!rawParams.HasMember("timestep") || !rawParams["timestep"].IsNumber())
+    {
+        command->command = cmdError;
+        return;
+    }
+    params->timestep = rawParams["timestep"].GetDouble();
 
     command->params = params;
 }
@@ -136,19 +164,27 @@ void CommandParser::parseGetState(Command *command, rapidjson::Document &d)
 
 void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Document &d)
 {
-    if(!d.HasMember("ship") || !d.HasMember("location"))
+    if(!d.HasMember("params") || !d["params"].IsObject())
     {
         command->command = cmdError;
         return;
     }
 
-    if(!d["ship"].IsInt64())
+    auto rawParams = d["params"].GetObject();
+
+    if(!rawParams.HasMember("shipid") || !rawParams.HasMember("location"))
     {
         command->command = cmdError;
         return;
     }
 
-    const Value& location = d["location"].GetObject();
+    if(!rawParams["shipid"].IsInt64())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    const Value& location = rawParams["location"].GetObject();
     if(!location.HasMember("x") || !location.HasMember("y") || !location.HasMember("z"))
     {
         command->command = cmdError;
@@ -162,7 +198,7 @@ void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Docu
     }
 
     auto params = new ParamsSetShipTargetLocation;
-    params->ship = d["ship"].GetInt64();
+    params->ship = rawParams["shipid"].GetInt64();
     params->location = btVector3(
             location["x"].GetDouble(),
             location["y"].GetDouble(),
@@ -174,13 +210,21 @@ void CommandParser::parseSetShipTargetLocation(Command *command, rapidjson::Docu
 
 void CommandParser::parseRemoveShip(Command *command, rapidjson::Document& d)
 {
-    if(!d.HasMember("owner"))
+    if(!d.HasMember("params") || !d["params"].IsObject())
     {
         command->command = cmdError;
         return;
     }
 
-    if(!d["owner"].IsInt64())
+    auto rawParams = d["params"].GetObject();
+
+    if(!rawParams.HasMember("owner"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!rawParams["owner"].IsInt64())
     {
         command->command = cmdError;
         return;
@@ -189,7 +233,7 @@ void CommandParser::parseRemoveShip(Command *command, rapidjson::Document& d)
     command->command = cmdRemoveShip;
 
     auto params = new ParamsRemoveShip;
-    params->owner = d["owner"].GetInt64();
+    params->owner = rawParams["owner"].GetInt64();
     command->params = params;
 }
 
