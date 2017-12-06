@@ -9,16 +9,20 @@
 Ship::Ship(esUserId owner, esTypeId shipType) :
     m_owner(owner),
     m_type(shipType),
+    m_sensorRange(100.0),
     m_body(nullptr),
     m_sensor(nullptr),
     m_collisionShape(nullptr),
-    m_sensorShape(nullptr)
+    m_motionState(nullptr),
+    m_sensorShape(nullptr),
+    m_sensorMotionState(nullptr),
+    m_dynamicsWorld(nullptr)
 {
     // Todo: Details should come from shipType
     m_collisionShape = new btSphereShape(10.0);
-    m_sensorShape = new btSphereShape(100.0);
     m_mass = btScalar(1.f);
     m_transform.setIdentity();
+    m_maxSpeed = 150.0f;
 }
 
 void Ship::setTransform(const btTransform &t)
@@ -28,21 +32,47 @@ void Ship::setTransform(const btTransform &t)
     // Todo: should this work after entering a solar system?
 }
 
-void Ship::prepare()
+void Ship::addToWorld(btDiscreteDynamicsWorld *world)
 {
+    if(!m_dynamicsWorld)
+    {
+        m_dynamicsWorld = world;
+    }
+    else
+    {
+        if(m_dynamicsWorld != world)
+        {
+            // Something is not right
+        }
+    }
+    prepareBody();
+    prepareSensor();
+}
+
+void Ship::removeFromWorld()
+{
+    m_dynamicsWorld->removeRigidBody(m_body);
+    m_dynamicsWorld->removeRigidBody(m_sensor);
+}
+
+void Ship::prepareSensor()
+{
+    if(m_sensor)
+    {
+        m_dynamicsWorld->removeRigidBody(m_sensor);
+        delete m_sensor;
+    }
+    if(m_sensorShape)
+    {
+        delete m_sensorShape;
+    }
+    if(m_sensorMotionState)
+    {
+        delete m_sensorMotionState;
+    }
+
+    m_sensorShape = new btSphereShape(m_sensorRange);
     btVector3 localInertia(0, 0, 0);
-    m_collisionShape->calculateLocalInertia(m_mass, localInertia);
-
-    m_motionState = new btDefaultMotionState(m_transform);
-    btRigidBody::btRigidBodyConstructionInfo rbInfo(
-            m_mass, m_motionState, m_collisionShape, localInertia
-    );
-    m_body = new btRigidBody(rbInfo);
-    m_body->setUserPointer(reinterpret_cast<void*>(this));
-    m_body->setUserIndex(esShip);
-    m_body->setLinearFactor(btVector3(1, 1, 0));
-    m_body->setActivationState(DISABLE_DEACTIVATION);
-
     m_sensorShape->calculateLocalInertia(m_mass, localInertia);
     m_sensorMotionState = new btDefaultMotionState(m_transform);
     btRigidBody::btRigidBodyConstructionInfo sensorRbInfo(
@@ -58,6 +88,30 @@ void Ship::prepare()
     m_sensor->setUserIndex(esSensor);
     m_sensor->setLinearFactor(btVector3(1, 1, 0));
     m_sensor->setActivationState(DISABLE_DEACTIVATION);
+    if(m_dynamicsWorld)
+    {
+        m_dynamicsWorld->addRigidBody(m_sensor, 2, 1);
+    }
+}
+
+void Ship::prepareBody()
+{
+    btVector3 localInertia(0, 0, 0);
+    m_collisionShape->calculateLocalInertia(m_mass, localInertia);
+
+    m_motionState = new btDefaultMotionState(m_transform);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(
+            m_mass, m_motionState, m_collisionShape, localInertia
+    );
+    m_body = new btRigidBody(rbInfo);
+    m_body->setUserPointer(reinterpret_cast<void*>(this));
+    m_body->setUserIndex(esShip);
+    m_body->setLinearFactor(btVector3(1, 1, 0));
+    m_body->setActivationState(DISABLE_DEACTIVATION);
+    if(m_dynamicsWorld)
+    {
+        m_dynamicsWorld->addRigidBody(m_body, 1, 0xffffffff);
+    }
 }
 
 btCollisionShape *Ship::getCollisionShape() const
@@ -68,16 +122,6 @@ btCollisionShape *Ship::getCollisionShape() const
 btRigidBody *Ship::getBody() const
 {
     return m_body;
-}
-
-btCollisionShape *Ship::getSensorCollisionShape() const
-{
-    return m_sensorShape;
-}
-
-btRigidBody *Ship::getSensorBody() const
-{
-    return m_sensor;
 }
 
 esUserId Ship::getOwner() const
@@ -117,7 +161,7 @@ void Ship::update(btScalar dt)
     if(distance > 1.0)
     {
         // Speed should come from the ship type and modifiers
-        velocity = v.normalized() * 150.0;
+        velocity = v.normalized() * m_maxSpeed;
     }
     else
     {
@@ -176,6 +220,17 @@ btScalar Ship::getRadius() const
 
 btScalar Ship::getSensorRange() const
 {
-    return 100;
+    return m_sensorRange;
 }
 
+void Ship::setAttribute(const std::string &attr, double value)
+{
+    if(attr == "maxspeed")
+    {
+        m_maxSpeed = value;
+    }
+    else if(attr == "sensorrange") {
+        m_sensorRange = value;
+        prepareSensor();
+    }
+}

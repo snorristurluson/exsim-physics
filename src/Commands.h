@@ -18,7 +18,8 @@ typedef enum
     cmdGetState,
     cmdSetMain,
     cmdSetViewer,
-    cmdSetShipTargetLocation
+    cmdSetShipTargetLocation,
+    cmdSetShipAttribute
 } CommandType;
 
 struct Params
@@ -52,6 +53,13 @@ struct ParamsSetShipTargetLocation : public Params
 {
     esUserId ship;
     btVector3 location;
+};
+
+struct ParamsSetShipAttribute : public Params
+{
+    esUserId ship;
+    std::string attribute;
+    btScalar value;
 };
 
 struct Command

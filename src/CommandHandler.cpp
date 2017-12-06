@@ -165,7 +165,7 @@ void CommandHandler::handleInput(const std::string &commandString, int connectio
                 }
             }
             auto duration = clock.getTimeSeconds() * 1000.0;
-            std::cout << "write: " << duration << std::endl;
+            // std::cout << "write: " << duration << std::endl;
 
         }
         gotLine = getwholeline(m_input, line);
@@ -198,8 +198,14 @@ std::string CommandHandler::handleCommand(Command *cmd)
             return R"({"result": "ok"})";
 
         case cmdSetShipTargetLocation:
+            std::cout << "setshiptargetlocation" << std::endl;
             return handleSetShipTargetLocation(
                     dynamic_cast<ParamsSetShipTargetLocation*>(cmd->params));
+
+        case cmdSetShipAttribute:
+            std::cout << "setshipattribute" << std::endl;
+            return handleSetShipAttribute(
+                    dynamic_cast<ParamsSetShipAttribute*>(cmd->params));
 
         default:
             return R"({"result": "error"})";
@@ -250,5 +256,16 @@ std::string CommandHandler::handleSetShipTargetLocation(ParamsSetShipTargetLocat
         return R"({"result": "error"})";
     }
     ship->setTargetLocation(params->location);
+    return R"({"result": "ok"})";
+}
+
+std::string CommandHandler::handleSetShipAttribute(ParamsSetShipAttribute *params)
+{
+    auto ship = m_solarsystem->findShip(params->ship);
+    if(!ship)
+    {
+        return R"({"result": "error"})";
+    }
+    ship->setAttribute(params->attribute, params->value);
     return R"({"result": "ok"})";
 }

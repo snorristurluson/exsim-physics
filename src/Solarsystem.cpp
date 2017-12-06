@@ -44,28 +44,11 @@ Solarsystem::~Solarsystem() {
         delete obj;
     }
 
-    for (int j = 0; j < m_collisionShapes.size(); j++)
-    {
-        btCollisionShape* shape = m_collisionShapes[j];
-        m_collisionShapes[j] = 0;
-        delete shape;
-    }
-
     delete m_dynamicsWorld;
     delete m_solver;
     delete m_overlappingPairCache;
     delete m_dispatcher;
     delete m_collisionConfiguration;
-}
-
-void Solarsystem::addCollisionShape(btCollisionShape *shape)
-{
-    m_collisionShapes.push_back(shape);
-}
-
-void Solarsystem::addRigidBody(btRigidBody *body, int group, int mask)
-{
-    m_dynamicsWorld->addRigidBody(body, group, mask);
 }
 
 void Solarsystem::stepSimulation(btScalar timeStep)
@@ -148,11 +131,7 @@ void Solarsystem::addShip(Ship *ship)
         return;
     }
 
-    ship->prepare();
-    addCollisionShape(ship->getCollisionShape());
-    addCollisionShape(ship->getSensorCollisionShape());
-    addRigidBody(ship->getBody(), 1, 0xffffffff);
-    addRigidBody(ship->getSensorBody(), 2, 1);
+    ship->addToWorld(m_dynamicsWorld);
     m_ships.push_back(ship);
 
     m_shipsByOwner[ship->getOwner()] = ship;
@@ -165,8 +144,8 @@ void Solarsystem::removeShip(Ship *ship)
     {
         m_shipsByOwner.erase(foundIt);
     }
+    ship->removeFromWorld();
     m_ships.erase(std::remove(m_ships.begin(), m_ships.end(), ship));
-    m_dynamicsWorld->removeRigidBody(ship->getBody());
 }
 
 Value shipSetToArray(const ShipSet &shipSet, Document &d)

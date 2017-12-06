@@ -67,6 +67,10 @@ Command *CommandParser::parse()
     {
         parseSetShipTargetLocation(result, d);
     }
+    else if(command == "setshipattribute")
+    {
+        parseSetShipAttribute(result, d);
+    }
     else
     {
         result->command = cmdError;
@@ -223,6 +227,49 @@ void CommandParser::parseRemoveShip(Command *command, rapidjson::Document& d)
 
     auto params = new ParamsRemoveShip;
     params->owner = rawParams["owner"].GetInt64();
+    command->params = params;
+}
+
+void CommandParser::parseSetShipAttribute(Command *command, rapidjson::Document& d)
+{
+    if(!d.HasMember("params") || !d["params"].IsObject())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    auto rawParams = d["params"].GetObject();
+
+    if(!rawParams.HasMember("shipid") || !rawParams.HasMember("attribute") || !rawParams.HasMember("value"))
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!rawParams["shipid"].IsInt64())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!rawParams["attribute"].IsString())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    if(!rawParams["value"].IsNumber())
+    {
+        command->command = cmdError;
+        return;
+    }
+
+    command->command = cmdSetShipAttribute;
+
+    auto params = new ParamsSetShipAttribute;
+    params->ship = rawParams["shipid"].GetInt64();
+    params->attribute = rawParams["attribute"].GetString();
+    params->value = rawParams["value"].GetDouble();
     command->params = params;
 }
 

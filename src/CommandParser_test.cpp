@@ -77,7 +77,8 @@ TEST(CommandParser, UnknownCommandReturnsRerror)
 TEST(CommandParser, SimpleAddShipCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"addship\", \"params\": {\"owner\": 1, \"typeid\": 2, \"position\": {\"x\": -10.0, \"y\": 10.0, \"z\": 0.0}}}");
+    parser.feed(
+            R"({"command": "addship", "params": {"owner": 1, "typeid": 2, "position": {"x": -10.0, "y": 10.0, "z": 0.0}}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdAddShip, cmd->command);
@@ -93,7 +94,7 @@ TEST(CommandParser, SimpleAddShipCommand)
 TEST(CommandParser, InvalidAddShipCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"addship\", \"bingo\": 1, \"typeid\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}");
+    parser.feed(R"({"command": "addship", "bingo": 1, "typeid": 2, "position": {"x": -10, "y": 10, "z": 0}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
@@ -103,7 +104,8 @@ TEST(CommandParser, InvalidAddShipCommand)
 TEST(CommandParser, AddShipCommandWithWrongTypeForOwner)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"addship\", \"params\": {\"owner\": \"1\", \"typeid\": 2, \"position\": {\"x\": -10, \"y\": 10, \"z\": 0}}}");
+    parser.feed(
+            R"({"command": "addship", "params": {"owner": "1", "typeid": 2, "position": {"x": -10, "y": 10, "z": 0}}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
@@ -113,7 +115,8 @@ TEST(CommandParser, AddShipCommandWithWrongTypeForOwner)
 TEST(CommandParser, AddShipCommandWithInvalidPositionOwner)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"addship\", \"params\": {\"owner\": 1, \"typeid\": 2, \"position\": {\"bingo\": -10, \"y\": 10, \"z\": 0}}}");
+    parser.feed(
+            R"({"command": "addship", "params": {"owner": 1, "typeid": 2, "position": {"bingo": -10, "y": 10, "z": 0}}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
@@ -123,7 +126,7 @@ TEST(CommandParser, AddShipCommandWithInvalidPositionOwner)
 TEST(CommandParser, RemoveShipCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"removeship\", \"params\": {\"owner\": 1}}");
+    parser.feed(R"({"command": "removeship", "params": {"owner": 1}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdRemoveShip, cmd->command);
@@ -135,7 +138,7 @@ TEST(CommandParser, RemoveShipCommand)
 TEST(CommandParser, StepSimulationCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"stepsimulation\", \"params\": {\"timestep\": 0.1}}");
+    parser.feed(R"({"command": "stepsimulation", "params": {"timestep": 0.1}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdStepSimulation, cmd->command);
@@ -147,7 +150,7 @@ TEST(CommandParser, StepSimulationCommand)
 TEST(CommandParser, InvalidStepSimulationCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"stepsimulation\", \"params\": {\"bingo\": 0.1}}");
+    parser.feed(R"({"command": "stepsimulation", "params": {"bingo": 0.1}})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdError, cmd->command);
@@ -157,7 +160,7 @@ TEST(CommandParser, InvalidStepSimulationCommand)
 TEST(CommandParser, GetStateCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"getstate\"}");
+    parser.feed(R"({"command": "getstate"})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdGetState, cmd->command);
@@ -166,7 +169,7 @@ TEST(CommandParser, GetStateCommand)
 TEST(CommandParser, SetAsMainCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"setmain\"}");
+    parser.feed(R"({"command": "setmain"})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdSetMain, cmd->command);
@@ -175,7 +178,7 @@ TEST(CommandParser, SetAsMainCommand)
 TEST(CommandParser, SetAsViewerCommand)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"setviewer\"}");
+    parser.feed(R"({"command": "setviewer"})");
     auto cmd = parser.parse();
 
     EXPECT_EQ(cmdSetViewer, cmd->command);
@@ -184,7 +187,7 @@ TEST(CommandParser, SetAsViewerCommand)
 TEST(CommandParser, TwoCommandsInOne)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"setmain\"}{\"command\": \"setviewer\"}");
+    parser.feed(R"({"command": "setmain"}{"command": "setviewer"})");
     auto cmd = parser.parse();
     EXPECT_EQ(cmdSetMain, cmd->command);
     cmd = parser.parse();
@@ -195,7 +198,8 @@ TEST(CommandParser, TwoCommandsInOne)
 TEST(CommandParser, SetShipTargetLocation)
 {
     CommandParser parser;
-    parser.feed("{\"command\": \"setshiptargetlocation\", \"params\": {\"shipid\": 1, \"location\": {\"x\": 100, \"y\": 100, \"z\": 0}}}");
+    parser.feed(
+            R"({"command": "setshiptargetlocation", "params": {"shipid": 1, "location": {"x": 100, "y": 100, "z": 0}}})");
     auto cmd = parser.parse();
     EXPECT_EQ(cmdSetShipTargetLocation, cmd->command);
 
@@ -205,4 +209,22 @@ TEST(CommandParser, SetShipTargetLocation)
     EXPECT_FLOAT_EQ(100.0, params->location.x());
     EXPECT_FLOAT_EQ(100.0, params->location.y());
     EXPECT_FLOAT_EQ(0.0, params->location.z());
+}
+
+TEST(CommandParser, SetShipAttribute)
+{
+    CommandParser parser;
+    parser.feed(
+            R"({"command": "setshipattribute", "params": {"shipid": 1, "attribute": "maxspeed", "value": 100}})"
+    );
+
+    auto cmd = parser.parse();
+    EXPECT_EQ(cmdSetShipAttribute, cmd->command);
+
+    auto params = dynamic_cast<ParamsSetShipAttribute*>(cmd->params);
+    ASSERT_NE(nullptr, params);
+
+    EXPECT_EQ(params->ship, 1);
+    EXPECT_EQ(params->attribute, "maxspeed");
+    EXPECT_FLOAT_EQ(params->value, 100);
 }

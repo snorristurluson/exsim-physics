@@ -27,10 +27,6 @@ public:
     int getNumShips();
 
 protected:
-    void addCollisionShape(btCollisionShape* shape);
-    void addRigidBody(btRigidBody* body, int group, int mask);
-
-protected:
     std::vector<Ship*> m_ships;
     std::map<esUserId, Ship*> m_shipsByOwner;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
@@ -38,7 +34,6 @@ protected:
     btBroadphaseInterface* m_overlappingPairCache;
     btSequentialImpulseConstraintSolver* m_solver;
     btDiscreteDynamicsWorld* m_dynamicsWorld;
-    btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 };
 
 #endif //PROJECT_SOLARSYSTEM_H

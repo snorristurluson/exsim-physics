@@ -26,12 +26,13 @@ protected:
     std::string handleRemoveShip(ParamsRemoveShip* params);
     std::string handleStepSimulation(ParamsStepSimulation *params);
     std::string handleGetState();
+    std::string handleSetShipTargetLocation(ParamsSetShipTargetLocation *params);
+    std::string handleSetShipAttribute(ParamsSetShipAttribute* params);
 
     void handleInput(const std::string &commandString, int connection);
 
     int setupFdSet(int listen_fd, fd_set &readfds) const;
 
-    std::string handleSetShipTargetLocation(ParamsSetShipTargetLocation *params);
 };
 
 
